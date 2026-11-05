@@ -5,11 +5,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Readex+Pro:wght@500;600;700&display=swap">
 <style>
-/* Layout: one reading column; a strip of 7 "HDFS blocks" picks the set; cards are questions, answers unfold under each. */
+/* Layout: one reading column; a strip of "HDFS blocks" picks the set; cards are questions, answers unfold under each. */
 :root{
   --bg:#F3F5F8; --surface:#FFFFFF; --sunken:#EBEFF4; --ink:#152131; --muted:#5A6A7D; --line:#D9E0E9;
   --accent:#1D5BCB; --accent-ink:#FFFFFF; --accent-soft:#E3ECFB;
   --ok:#17804A; --ok-soft:#E2F4EA; --bad:#BD3128; --bad-soft:#FBE7E5; --flag:#B86E00; --flag-soft:#FDF0DA;
+  --paper:#FFFEFA;
   --f-body:'IBM Plex Sans Arabic',system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;
   --f-head:'Readex Pro','IBM Plex Sans Arabic',system-ui,sans-serif;
   --f-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
@@ -18,65 +19,72 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0E131A; --surface:#161D27; --sunken:#1C2532; --ink:#E5EAF1; --muted:#97A6B9; --line:#2A3646;
   --accent:#78A6FF; --accent-ink:#0B1220; --accent-soft:#1E2C47;
-  --ok:#55C98D; --ok-soft:#163327; --bad:#F2837A; --bad-soft:#3A1D1C; --flag:#F2B861; --flag-soft:#3A2B14; color-scheme:dark}}
+  --ok:#55C98D; --ok-soft:#163327; --bad:#F2837A; --bad-soft:#3A1D1C; --flag:#F2B861; --flag-soft:#3A2B14; --paper:#181F2A; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0E131A; --surface:#161D27; --sunken:#1C2532; --ink:#E5EAF1; --muted:#97A6B9; --line:#2A3646;
   --accent:#78A6FF; --accent-ink:#0B1220; --accent-soft:#1E2C47;
-  --ok:#55C98D; --ok-soft:#163327; --bad:#F2837A; --bad-soft:#3A1D1C; --flag:#F2B861; --flag-soft:#3A2B14; color-scheme:dark}
+  --ok:#55C98D; --ok-soft:#163327; --bad:#F2837A; --bad-soft:#3A1D1C; --flag:#F2B861; --flag-soft:#3A2B14; --paper:#181F2A; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.7;margin:0}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
-.wrap{max-width:860px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:880px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 b,strong{font-weight:700}
 code{font-family:var(--f-mono);font-size:.86em;background:var(--sunken);padding:1px 5px;border-radius:4px;direction:ltr;unicode-bidi:isolate;white-space:pre-wrap;word-break:break-word}
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
-/* header */
 header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
-.top .wrap{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-block:10px}
+.top .wrap{display:flex;align-items:center;gap:10px 12px;flex-wrap:wrap;padding-block:10px}
 .brand{display:flex;flex-direction:column;min-width:0;margin-inline-end:auto}
 .brand .code{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
 .brand h1{font-family:var(--f-head);font-size:18px;margin:0;line-height:1.3;text-wrap:balance}
 .overall{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:13px;color:var(--muted);white-space:nowrap}
 .overall strong{color:var(--ink);font-size:15px}
-nav.tabs{display:flex;gap:4px;background:var(--sunken);padding:3px;border-radius:9px}
-nav.tabs a{padding:5px 12px;border-radius:7px;text-decoration:none;color:var(--muted);font-weight:600;font-size:14px;white-space:nowrap}
+nav.tabs{display:flex;gap:4px;background:var(--sunken);padding:3px;border-radius:9px;overflow-x:auto;max-width:100%}
+nav.tabs a{padding:5px 11px;border-radius:7px;text-decoration:none;color:var(--muted);font-weight:600;font-size:13.5px;white-space:nowrap}
 nav.tabs a[aria-current="page"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgb(0 0 0 / .08)}
 nav.tabs .count{font-family:var(--f-mono);font-size:11px;background:var(--flag-soft);color:var(--flag);border-radius:10px;padding:0 6px;margin-inline-start:4px}
 
 main{padding-block:18px 60px}
 .view[hidden]{display:none}
 
-/* block strip (set picker) */
 .strip-label{font-family:var(--f-mono);font-size:11.5px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin:0 0 6px}
 .strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px;direction:ltr}
-.blk.past{border-style:dashed}
-.blk.past .n::after{content:" · MCQ";color:var(--flag);font-weight:500}
-.blk{border:1.5px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 6px 6px;text-align:left;display:flex;flex-direction:column;gap:5px;min-width:0}
+.strip.q3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.blk{border:1.5px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 8px 6px;text-align:left;display:flex;flex-direction:column;gap:5px;min-width:0}
 .blk .n{font-family:var(--f-mono);font-size:12px;font-weight:600}
 .blk .meta{font-family:var(--f-mono);font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .blk .bar{height:5px;background:var(--sunken);border-radius:3px;overflow:hidden;display:flex}
 .blk .bar i{display:block;height:100%}
 .blk .bar .g{background:var(--ok)} .blk .bar .r{background:var(--bad)} .blk .bar .p{background:var(--accent)}
 .blk[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
-@media (max-width:560px){.strip{grid-template-columns:repeat(4,minmax(0,1fr))}header.top{position:static}.brand h1{font-size:16px}}
+@media (max-width:560px){.strip:not(.q3){grid-template-columns:repeat(4,minmax(0,1fr))}header.top{position:static}.brand h1{font-size:16px}}
+
+/* exam paper header (quizzes) */
+.paper{background:var(--paper);border:1.5px solid var(--ink);border-radius:4px;padding:12px 16px;margin-top:16px;direction:ltr;font-family:Georgia,'Times New Roman',serif}
+.paper .uni{text-align:center;font-weight:700;font-size:16px;line-height:1.35}
+.paper .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 16px;font-size:13.5px;margin-top:8px}
+.paper .grid b{font-weight:700}
+.paper .qline{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:1px solid var(--ink);margin-top:8px;padding-top:6px;font-weight:700;text-decoration:underline}
+@media (max-width:560px){.paper .grid{grid-template-columns:1fr}}
+.timer{font-family:var(--f-mono);font-size:18px;font-weight:600;font-variant-numeric:tabular-nums}
+.timer.low{color:var(--bad)}
 
 .sethead{display:flex;gap:14px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;margin:20px 0 12px}
 .sethead h2{font-family:var(--f-head);font-size:22px;margin:0;line-height:1.3;direction:ltr;text-align:right}
 .sethead p{margin:2px 0 0;color:var(--muted);font-size:13.5px}
-.modes{display:flex;border:1.5px solid var(--line);border-radius:9px;overflow:hidden;flex-shrink:0}
-.modes button{border:0;background:var(--surface);padding:7px 14px;font-weight:600;font-size:13.5px;color:var(--muted)}
+.modes{display:flex;border:1.5px solid var(--line);border-radius:9px;overflow:hidden;flex-shrink:0;flex-wrap:wrap}
+.modes button{border:0;background:var(--surface);padding:7px 13px;font-weight:600;font-size:13.5px;color:var(--muted)}
 .modes button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.modehelp{font-size:13px;color:var(--muted);margin:-4px 0 12px}
 .scorebar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 14px;margin-bottom:14px;font-size:14px}
 .scorebar .big{font-family:var(--f-mono);font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
-.scorebar .ok{color:var(--ok)} .scorebar .bad{color:var(--bad)}
+.ok{color:var(--ok)} .bad{color:var(--bad)}
 .scorebar .sp{margin-inline-start:auto}
 .btn{border:1.5px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 14px;font-weight:600;font-size:14px}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .btn:disabled{opacity:.5;cursor:default}
 
-/* question card */
 .q{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px 16px;margin-bottom:12px}
 .q.flagged{border-color:var(--flag);box-shadow:inset 3px 0 0 var(--flag)}
 .qhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
@@ -126,64 +134,86 @@ main{padding-block:18px 60px}
 .result .big{font-family:var(--f-mono);font-size:34px;font-weight:600;font-variant-numeric:tabular-nums}
 .empty{color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:var(--r);padding:22px;text-align:center}
 
-/* review filters */
 .filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
 .filters button{border:1.5px solid var(--line);background:var(--surface);border-radius:20px;padding:4px 12px;font-size:13.5px;font-weight:600;color:var(--muted)}
 .filters button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
 
-/* summary */
-.toc{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;direction:ltr}
+/* lectures + summary */
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px}
 .toc a{font-size:12.5px;text-decoration:none;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:3px 9px}
 .topic{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;margin-bottom:14px;scroll-margin-top:90px}
-.topic h3{font-family:var(--f-head);font-size:19px;margin:0 0 6px;direction:ltr;text-align:right}
-.topic .lesson{margin:0 0 12px}
+.topic h3{font-family:var(--f-head);font-size:19px;margin:0 0 6px;text-wrap:balance}
+.topic h3.en{direction:ltr;text-align:right}
+.topic .lesson{margin:0 0 12px;color:var(--muted)}
+.lsec{margin-top:14px}
+.lsec h4{font-family:var(--f-head);font-size:15.5px;margin:0 0 6px;color:var(--accent)}
+.lsec p{margin:0 0 6px}
 .points{display:grid;gap:8px;margin:0 0 14px;padding:0;list-style:none}
 .points li{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:10px;padding-bottom:8px;border-bottom:1px solid var(--line)}
 .points li:last-child{border-bottom:0;padding-bottom:0}
 .points .term{font-weight:700;direction:ltr;text-align:right;font-size:14px}
 @media (max-width:560px){.points li{grid-template-columns:1fr;gap:2px}}
-.hints h4,.topic h4{font-family:var(--f-head);font-size:14px;margin:0 0 6px;color:var(--accent)}
-.tbl{overflow-x:auto}
+.topic h4{font-family:var(--f-head);font-size:14px;margin:0 0 6px;color:var(--accent)}
+.tbl{overflow-x:auto;margin-bottom:8px}
 table{border-collapse:collapse;width:100%;font-size:14px}
 th,td{border-bottom:1px solid var(--line);padding:6px 8px;vertical-align:top}
-th{font-family:var(--f-head);font-weight:600;font-size:12.5px;color:var(--muted);text-align:right}
-td.en{direction:ltr;text-align:left}
+th{font-family:var(--f-head);font-weight:600;font-size:12.5px;color:var(--muted);text-align:right;background:var(--sunken)}
+td.en,th.en{direction:ltr;text-align:left}
 td.arrow{color:var(--muted);width:1%;white-space:nowrap}
 td.ans{font-weight:700;color:var(--accent);direction:ltr;text-align:left}
+td.why{min-width:180px}
+td.hint{color:var(--muted);font-size:13px;min-width:150px}
 .pill{display:inline-block;font-family:var(--f-mono);font-size:11.5px;font-weight:600;border-radius:5px;padding:0 7px}
 .pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.bad{background:var(--bad-soft);color:var(--bad)}
 .note{color:var(--muted);font-size:13.5px}
-h2.sum{font-family:var(--f-head);font-size:22px;margin:26px 0 10px}
+h2.sum{font-family:var(--f-head);font-size:22px;margin:28px 0 10px;scroll-margin-top:90px}
+.traps{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.traps li{display:grid;grid-template-columns:minmax(120px,200px) 1fr;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.traps li b{direction:ltr;text-align:right}
+@media (max-width:560px){.traps li{grid-template-columns:1fr;gap:2px}}
+.en-sum{background:var(--sunken);border-radius:8px;padding:10px 14px;text-align:left}
+.en-sum ul{margin:0;padding-left:18px}
+.en-sum li{margin-bottom:5px}
+details.qh{border-top:1px solid var(--line);padding-top:8px;margin-top:8px}
+details.qh summary{cursor:pointer;font-family:var(--f-head);font-weight:600;font-size:15px;color:var(--accent)}
 @media (prefers-reduced-motion:no-preference){.reveal{animation:fade .18s ease-out}@keyframes fade{from{opacity:.4}to{opacity:1}}}
 </style>
 
 <div dir="rtl" lang="ar">
 <header class="top"><div class="wrap">
-  <div class="brand"><span class="code">IS 365 · Big Data Technologies · Lectures 1–5</span><h1>مراجعة الميدترم — 160 سؤال</h1></div>
+  <div class="brand"><span class="code">IS 365 · Big Data Technologies · Lectures 1–5</span><h1>مراجعة الميدترم</h1></div>
   <span class="overall" id="overall"></span>
   <nav class="tabs" aria-label="Sections">
-    <a href="#exam" data-tab="exam">الامتحان</a>
+    <a href="#quiz" data-tab="quiz">الكويزات (3 × 25)</a>
+    <a href="#exam" data-tab="exam">بنك الأسئلة</a>
+    <a href="#lectures" data-tab="lectures">شرح المحاضرات</a>
+    <a href="#summary" data-tab="summary">أهم النقط والهنتات</a>
     <a href="#review" data-tab="review">المراجعة<span class="count" id="flagCount">0</span></a>
-    <a href="#summary" data-tab="summary">الملخص والهنتات</a>
   </nav>
 </div></header>
 
 <main class="wrap">
   <section class="view" id="v-exam">
-    <p class="strip-label">Sets 1–7: 100 questions (MCQ + T/F) · Sets 8–11: 60 MCQ (Midterm Fall 2024 + same style)</p>
+    <p class="strip-label" id="stripLabel"></p>
     <div class="strip" id="strip"></div>
+    <div id="paper"></div>
     <div class="sethead">
       <div><h2 id="setTitle"></h2><p id="setSub"></p></div>
       <div class="modes" role="group" aria-label="Mode">
         <button id="mExam" type="button">وضع الامتحان</button>
+        <button id="mPractice" type="button">وضع التدريب</button>
         <button id="mShow" type="button">الإجابات ظاهرة</button>
       </div>
     </div>
+    <p class="modehelp" id="modeHelp"></p>
     <div class="scorebar" id="scorebar"></div>
     <div id="qlist"></div>
     <div class="endbar" id="endbar"></div>
     <div id="result"></div>
   </section>
+
+  <section class="view" id="v-lectures" hidden><div id="lectures"></div></section>
+  <section class="view" id="v-summary" hidden><div id="summary"></div></section>
 
   <section class="view" id="v-review" hidden>
     <div class="sethead"><div><h2 style="direction:rtl">المراجعة</h2><p>الأسئلة اللي علّمت عليها أو غلطت فيها، بالشرح الكامل وشرح زيادة للموضوع.</p></div></div>
@@ -193,10 +223,6 @@ h2.sum{font-family:var(--f-head);font-size:22px;margin:26px 0 10px}
       <button type="button" data-f="both" aria-pressed="false">الاتنين</button>
     </div>
     <div id="rlist"></div>
-  </section>
-
-  <section class="view" id="v-summary" hidden>
-    <div id="summary"></div>
   </section>
 </main>
 </div>
@@ -1025,61 +1051,61 @@ w:[`غلط — batch بس.`,`صح حسب السلايد — Real time processing
 tip:`Real time → Flink · Near real time → Spark.`,src:`Midterm Fall 2024 · Q15 · Lecture 2 · MapReduce vs Spark vs Flink`},
 
 /* ───────────── SET 9 — Midterm Fall 2024, Q16–25 + 5 new ───────────── */
-{s:9,t:'m',fix:true,tp:'grid',q:`Which of the following is the correct statement?`,
+{s:8,t:'m',fix:true,tp:'grid',q:`Which of the following is the correct statement?`,
 o:[`Data locality means moving computation to data instead of data to computation`,`Data locality means moving data to computation instead of computation to data`,`Both the above`,`None of the above`],a:0,
 ex:`ميزة Data Locality: **this algorithm is moved to data in the cluster rather than bringing data to the location where the algorithm is submitted**. الكود صغير والداتا ضخمة، فننقل الكود. الإجابة المعلّمة (a) **صح**.`,
 w:[`صح.`,`غلط — معكوسة.`,`غلط — الاتنين عكس بعض.`,`غلط.`],
 tip:`Data locality = computation → data.`,src:`Midterm Fall 2024 · Q16 · Lecture 3 · Features of Hadoop`},
 
-{s:9,t:'m',fix:true,tp:'engines',q:`Which of these is NOT a typical use case for Apache Spark?`,
+{s:8,t:'m',fix:true,tp:'engines',q:`Which of these is NOT a typical use case for Apache Spark?`,
 o:[`Machine learning`,`Graph processing`,`Real-time video processing`,`Batch processing`],a:2,
 ex:`Spark بيستخدم في الـ **batch** والـ **iterative** (زي **machine learning**) وكمان graph processing (مكتبة GraphX). أما الـ **real-time** فـ Spark **near real time** بس، والـ real-time video processing مش use case نموذجي ليه. الإجابة المعلّمة (c) **صح**.`,
 w:[`غلط — ML من أشهر استخدامات Spark (iterative in memory).`,`غلط — Spark بيعمل graph processing.`,`صح — real time مش نقطة قوة Spark.`,`غلط — Spark بيدعم batch.`],
 tip:`Spark: batch + ML/iterative + near real time. "Real-time" → مش Spark.`,src:`Midterm Fall 2024 · Q17 · Lecture 2`},
 
-{s:9,t:'m',fix:true,tp:'splits',q:`What is the primary advantage of data-local map tasks in Hadoop?`,
+{s:8,t:'m',fix:true,tp:'splits',q:`What is the primary advantage of data-local map tasks in Hadoop?`,
 o:[`Reduced network congestion`,`Increased data transformation speed`,`Simplified task scheduling`,`Enhanced security protocols`],a:0,
 ex:`السلايد: Hadoop **does its best to run the map task on a node where the input data resides in HDFS, because it doesn't use valuable cluster bandwidth.** يعني data-local = الداتا مش بتتنقل على الشبكة = **less network congestion**. الإجابة المعلّمة (a) **صح**.`,
 w:[`صح.`,`غلط — الـ transformation نفسها نفس السرعة.`,`غلط — الجدولة مش أبسط.`,`غلط — مالهاش علاقة بالأمان.`],
 tip:`Data-local → saves bandwidth → less network congestion.`,src:`Midterm Fall 2024 · Q18 · Lecture 3 · Data locality`},
 
-{s:9,t:'m',fix:true,tp:'splits',q:`What is the impact of running a map task off-rack?`,
+{s:8,t:'m',fix:true,tp:'splits',q:`What is the impact of running a map task off-rack?`,
 o:[`Increased data processing speed`,`Improved fault tolerance`,`Higher network bandwidth usage`,`Reduced computational power`],a:2,
 ex:`السلايد: لما مفيش node فاضي في نفس الـ rack **an off-rack node is used, which results in an inter-rack network transfer.** نقل الداتا بين الـ racks = **more network bandwidth**. الإجابة المعلّمة (c) **صح**.`,
 w:[`غلط — العكس، أبطأ.`,`غلط.`,`صح — inter-rack transfer.`,`غلط — الـ CPU زي ما هو.`],
 tip:`Off-rack → inter-rack transfer → higher bandwidth usage.`,src:`Midterm Fall 2024 · Q19 · Lecture 3 · Data locality`},
 
-{s:9,t:'m',fix:true,tp:'splits',q:`When is it most beneficial to execute an off-rack map task?`,
+{s:8,t:'m',fix:true,tp:'splits',q:`When is it most beneficial to execute an off-rack map task?`,
 o:[`When data is highly distributed`,`During peak network usage`,`When local resources are exhausted`,`In a single-node cluster`],a:2,
 ex:`الترتيب: data-local أولاً، لو كل الـ nodes اللي عليها replicas مشغولة → rack-local، و**very occasionally even this is not possible, so an off-rack node is used**. يعني off-rack بس لما الـ local resources (data-local و rack-local) **exhausted**. الإجابة المعلّمة (c) **صح**.`,
 w:[`غلط.`,`غلط — وقت الذروة أسوأ وقت تنقل داتا بين racks.`,`صح.`,`غلط — single-node مفيهوش racks تانية.`],
 tip:`Off-rack = last resort when local slots are busy.`,src:`Midterm Fall 2024 · Q20 · Lecture 3 · Data locality`},
 
-{s:9,t:'m',fix:true,tp:'splits',q:`What is a potential trade-off when prioritizing rack-local tasks over data-local tasks?`,
+{s:8,t:'m',fix:true,tp:'splits',q:`What is a potential trade-off when prioritizing rack-local tasks over data-local tasks?`,
 o:[`Reduced data security`,`Lower computational efficiency`,`Increased task scheduling complexity`,`Higher network latency`],a:3,
 ex:`في الـ **rack-local** الـ block على node تاني في نفس الـ rack، فلازم الداتا تتنقل على الشبكة داخل الـ rack. ده أحسن من off-rack، لكن أبطأ من data-local بسبب **network latency**. الإجابة المعلّمة (d) **صح**.`,
 w:[`غلط.`,`غلط — الحساب نفسه زي ما هو.`,`غلط.`,`صح.`],
 tip:`rack-local vs data-local → network latency.`,src:`Midterm Fall 2024 · Q21 · Lecture 3 · Data locality`},
 
-{s:9,t:'m',fix:true,tp:'hadoop',q:`Which of the following is NOT a use case for Hadoop?`,
+{s:8,t:'m',fix:true,tp:'hadoop',q:`Which of the following is NOT a use case for Hadoop?`,
 o:[`Intensive calculations with little data`,`Massive amounts of data through parallelism`,`Processing a variety of data formats`,`Using inexpensive commodity hardware`],a:0,
 ex:`سلايد Why & where Hadoop is used / not used: **Not good for intensive calculations with little data**. الباقي (massive data، variety، commodity hardware) من قايمة **good for**. الإجابة المعلّمة (a) **صح**.`,
 w:[`صح — not good for.`,`غلط — good for.`,`غلط — good for.`,`غلط — good for.`],
 tip:`little data / small files / low latency / transactions → NOT Hadoop.`,src:`Midterm Fall 2024 · Q22 · Lecture 4`},
 
-{s:9,t:'m',fix:true,tp:'hadoop',q:`What kind of workloads is Hadoop best suited for?`,
+{s:8,t:'m',fix:true,tp:'hadoop',q:`What kind of workloads is Hadoop best suited for?`,
 o:[`Workloads that cannot be parallelized`,`Low latency real-time processing`,`Large-scale batch processing`,`Intensive calculations with small datasets`],a:2,
 ex:`MapReduce **is a good fit for problems that need to analyze the whole dataset in a batch fashion** و Hadoop good for **massive amounts of data through parallelism**. الإجابة المعلّمة (c) **صح**.`,
 w:[`غلط — not good when work cannot be parallelized.`,`غلط — not good for low latency.`,`صح.`,`غلط — not good for little data.`],
 tip:`Hadoop best = large-scale batch.`,src:`Midterm Fall 2024 · Q23 · Lecture 2/4`},
 
-{s:9,t:'m',fix:true,tp:'hadoop',q:`For which of the following is Hadoop NOT recommended?`,
+{s:8,t:'m',fix:true,tp:'hadoop',q:`For which of the following is Hadoop NOT recommended?`,
 o:[`Processing structured and unstructured data`,`Low latency data access`,`Parallel processing of large datasets`,`Using inexpensive hardware`],a:1,
 ex:`Hadoop **not good for low latency data access**. الباقي كلهم من مميزاته. الإجابة المعلّمة (b) **صح**.`,
 w:[`غلط — good for variety of data.`,`صح.`,`غلط — دي أساس Hadoop.`,`غلط — commodity hardware ميزة.`],
 tip:`Low latency → NOT Hadoop.`,src:`Midterm Fall 2024 · Q24 · Lecture 4`},
 
-{s:9,t:'m',fix:true,tp:'join',q:`In ……, the basic idea is that the mapper tags each record with its source and uses the join key as the map output key.`,
+{s:8,t:'m',fix:true,tp:'join',q:`In ……, the basic idea is that the mapper tags each record with its source and uses the join key as the map output key.`,
 o:[`map side join`,`reduce side join`,`SQL query`],a:1,
 ex:`السلايد (Reduce join): **The basic idea is that the mapper tags each record with its source and uses the join key as the map output key, so that the records with the same key are brought together in the reducer.** الإجابة المعلّمة (b) **صح**.`,
 w:[`غلط — في الـ map-side الـ join بيحصل في الـ mapper نفسه والـ input لازم partitioned and sorted.`,`صح.`,`غلط.`],
@@ -1116,182 +1142,182 @@ w:[`غلط — نفس الداتا هتتنقل.`,`صح.`,`غلط — مالوش
 tip:`minimize shuffled data → combiner.`,src:`Lecture 3 · Combiners`},
 
 /* ───────────── SET 10 — Midterm-style practice (1) ───────────── */
-{s:10,t:'m',tp:'splits',q:`Where is the output of a map task stored, and why?`,
+{s:9,t:'m',tp:'splits',q:`Where is the output of a map task stored, and why?`,
 o:[`In HDFS, to be replicated three times`,`On the local disk, because it is intermediate output`,`In the NameNode memory`,`In the distributed cache`],a:1,
 ex:`السلايد: **Map tasks write their output to the local disk, not to HDFS.** السبب: **Map output is intermediate output** بتعالجه الـ reduce tasks عشان تطلع الـ final output، فمالوش لازمة يتعمله replication.`,
 w:[`غلط — هيبقى إسراف.`,`صح.`,`غلط — NameNode للـ metadata.`,`غلط — للـ side data.`],
 tip:`Map output → local disk.`,src:`Lecture 3 · Data locality`},
 
-{s:10,t:'m',tp:'splits',q:`Why don't reduce tasks have the advantage of data locality?`,
+{s:9,t:'m',tp:'splits',q:`Why don't reduce tasks have the advantage of data locality?`,
 o:[`Because reducers run on the NameNode`,`Because the input to a single reduce task is normally the output from all mappers`,`Because reducers read from a SAN`,`Because reduce output is not stored in HDFS`],a:1,
 ex:`السلايد: **Reduce tasks don't have the advantage of data locality; the input to a single reduce task is normally the output from all mappers.** الـ reducer لازم يسحب الداتا من كل الـ mappers على الشبكة.`,
 w:[`غلط.`,`صح.`,`غلط — SAN بتاع HPC.`,`غلط — الـ reduce output بيتخزن في HDFS.`],
 tip:`Reducer input = from ALL mappers → no locality.`,src:`Lecture 3 · Data locality`},
 
-{s:10,t:'m',tp:'splits',q:`What is the default HDFS block size, which is also a good default split size?`,
+{s:9,t:'m',tp:'splits',q:`What is the default HDFS block size, which is also a good default split size?`,
 o:[`32 MB`,`64 MB`,`128 MB`,`1 GB`],a:2,
 ex:`السلايد: **a good split size tends to be the size of an HDFS block, which is 128 MB by default**.`,
 w:[`غلط.`,`غلط — ده كان في إصدارات قديمة، والسلايد بيقول 128.`,`صح.`,`غلط.`],
 tip:`Block = 128 MB.`,src:`Lecture 3 · Data Flow`},
 
-{s:10,t:'m',tp:'splits',q:`What happens to load balancing when input splits are made smaller (but not too small)?`,
+{s:9,t:'m',tp:'splits',q:`What happens to load balancing when input splits are made smaller (but not too small)?`,
 o:[`It gets worse, because there are more splits`,`It improves, because a faster machine can process proportionally more splits than a slower one`,`It is not affected`,`It becomes impossible`],a:1,
 ex:`السلايد: لو الـ splits صغيرة، وقت معالجة كل split صغير مقارنة بالـ input كله، فـ **processing is better load balanced ... since a faster machine will be able to process proportionally more splits**. لكن لو صغيرة أوي، الـ overhead يغلب.`,
 w:[`غلط.`,`صح.`,`غلط.`,`غلط.`],
 tip:`smaller splits → better balance · too small → overhead.`,src:`Lecture 3 · Data Flow`},
 
-{s:10,t:'m',tp:'grid',q:`Which statement correctly compares Hadoop with Grid computing (HPC)?`,
+{s:9,t:'m',tp:'grid',q:`Which statement correctly compares Hadoop with Grid computing (HPC)?`,
 o:[`Grid co-locates data with compute nodes; Hadoop uses a shared SAN`,`Hadoop co-locates data with compute nodes; Grid nodes access a shared file system on a SAN`,`Both use the same approach to data access`,`Grid uses high-level programming; Hadoop uses low-level programming`],a:1,
 ex:`HPC: الأجهزة بتوصل لـ **shared file system hosted by a SAN**، والشبكة بتبقى bottleneck مع الداتا الكبيرة. Hadoop: **tries to co-locate the data with the compute nodes** (data locality). وكمان Grid = low level و Hadoop = high level.`,
 w:[`غلط — معكوسة.`,`صح.`,`غلط.`,`غلط — معكوسة.`],
 tip:`Grid = SAN + low level. Hadoop = data locality + high level.`,src:`Lecture 2 · Hadoop vs Grid computing`},
 
-{s:10,t:'m',tp:'grid',q:`Why are MPI programs harder to write than MapReduce programs?`,
+{s:9,t:'m',tp:'grid',q:`Why are MPI programs harder to write than MapReduce programs?`,
 o:[`MPI programs must explicitly manage their own checkpointing and recovery`,`MPI does not support parallelism`,`MPI only runs on a single machine`,`MPI programs cannot use networks`],a:0,
 ex:`السلايد: **MPI programs have to explicitly manage their own check pointing and recovery, which gives more control to the programmer but makes them more difficult to write.** في MapReduce الـ engine بيتعامل مع الـ failures.`,
 w:[`صح.`,`غلط — MPI للـ parallel computing.`,`غلط — بيشتغل على cluster.`,`غلط — Message Passing أصلاً على الشبكة.`],
 tip:`MPI = more control + harder (manual checkpointing).`,src:`Lecture 2 · Hadoop vs Grid computing`},
 
-{s:10,t:'m',tp:'grid',q:`What does "shared-nothing architecture" mean in MapReduce?`,
+{s:9,t:'m',tp:'grid',q:`What does "shared-nothing architecture" mean in MapReduce?`,
 o:[`All tasks share one disk`,`Tasks have no dependence on one another`,`Nodes share no network`,`Data is never replicated`],a:1,
 ex:`السلايد: **shared-nothing architecture, meaning that tasks have no dependence on one other.** عشان كده الـ framework يقدر يعيد تشغيل أي task فشل، و**the order in which the tasks run doesn't matter**.`,
 w:[`غلط.`,`صح.`,`غلط.`,`غلط — HDFS بيعمل replication.`],
 tip:`shared-nothing = independent tasks.`,src:`Lecture 2 · Hadoop vs Grid computing`},
 
-{s:10,t:'m',tp:'hadoop',q:`Which of the following is NOT a feature of Hadoop?`,
+{s:9,t:'m',tp:'hadoop',q:`Which of the following is NOT a feature of Hadoop?`,
 o:[`Fault tolerance`,`Data locality`,`ACID transactions`,`Horizontal scalability`],a:2,
 ex:`مميزات Hadoop التسعة: Open source, Distributed processing, Fault tolerance, Reliability, High availability, Scalability, Economic, Easy to use, Data locality. أما **ACID transactions** فده RDBMS؛ MapReduce Transactions = **None**.`,
 w:[`غلط — ميزة.`,`غلط — ميزة.`,`صح — مش ميزة Hadoop.`,`غلط — ميزة.`],
 tip:`ACID → RDBMS, never Hadoop.`,src:`Lecture 3 · Features of Hadoop`},
 
-{s:10,t:'m',tp:'hadoop',q:`What does horizontal scalability in Hadoop mean?`,
+{s:9,t:'m',tp:'hadoop',q:`What does horizontal scalability in Hadoop mean?`,
 o:[`Replacing a server with a more powerful one`,`Adding new nodes to the cluster on the fly without downtime`,`Increasing the block size`,`Adding more RAM to the NameNode`],a:1,
 ex:`السلايد: **horizontal scalability which means new nodes can be added on the fly without any downtime.** تبديل السيرفر بواحد أقوى ده vertical scaling.`,
 w:[`غلط — ده vertical.`,`صح.`,`غلط.`,`غلط — برضه vertical.`],
 tip:`Horizontal = more nodes. Vertical = bigger machine.`,src:`Lecture 3 · Features of Hadoop`},
 
-{s:10,t:'m',tp:'hadoop',q:`Which HDFS component keeps track of which DataNode stores each block?`,
+{s:9,t:'m',tp:'hadoop',q:`Which HDFS component keeps track of which DataNode stores each block?`,
 o:[`DataNode`,`NameNode`,`ResourceManager`,`Reducer`],a:1,
 ex:`الـ **NameNode** = metadata manager: file names and locations، how files are split into blocks، و **which DataNode stores each block**. مش بيخزن الداتا نفسها.`,
 w:[`غلط — بيخزن الـ blocks.`,`صح.`,`غلط — بتاع YARN.`,`غلط.`],
 tip:`metadata → NameNode.`,src:`HDFS · NameNode vs DataNode`},
 
-{s:10,t:'m',tp:'rdbms',q:`Which type of data does Hadoop handle especially well because of schema-on-read?`,
+{s:9,t:'m',tp:'rdbms',q:`Which type of data does Hadoop handle especially well because of schema-on-read?`,
 o:[`Only normalized relational tables`,`Unstructured and semi-structured data`,`Only small transactional records`,`Only XML documents with a strict schema`],a:1,
 ex:`السلايد: **Hadoop works well on unstructured or semi-structured data because it is designed to interpret the data at processing time (schema-on-read).**`,
 w:[`غلط — الـ normalization مشكلة لـ Hadoop.`,`صح.`,`غلط — Hadoop مش للـ transactions.`,`غلط — دي structured (realm of RDBMS).`],
 tip:`Unstructured / semi + Hadoop ← schema-on-read.`,src:`Lecture 2 · MapReduce vs RDBMS`},
 
-{s:10,t:'m',tp:'rdbms',q:`What is an advantage of schema-on-read?`,
+{s:9,t:'m',tp:'rdbms',q:`What is an advantage of schema-on-read?`,
 o:[`It guarantees high data integrity`,`It provides flexibility and avoids the costly data loading phase, since loading is just a file copy`,`It supports ACID transactions`,`It requires the schema before storing data`],a:1,
 ex:`السلايد: schema-on-read **provides flexibility and avoids the costly data loading phase of an RDBMS, since in Hadoop it is just a file copy.**`,
 w:[`غلط — الـ integrity في Hadoop Low.`,`صح.`,`غلط.`,`غلط — ده schema-on-write.`],
 tip:`on-read advantage = flexibility + fast loading (file copy).`,src:`Lecture 2 · MapReduce vs RDBMS`},
 
-{s:10,t:'m',tp:'rdbms',q:`Why are web server logs well suited for analysis with Hadoop?`,
+{s:9,t:'m',tp:'rdbms',q:`Why are web server logs well suited for analysis with Hadoop?`,
 o:[`They are not normalized, e.g., client hostnames are written in full each time`,`They are always small files`,`They need frequent updates`,`They require ACID guarantees`],a:0,
 ex:`السلايد: **A web server log is a good example of a set of records that is not normalized** (the client hostnames are specified in full each time). عدم الـ normalization يخلي قراءة الـ record **local** ومناسبة للـ streaming reads.`,
 w:[`صح.`,`غلط — الـ small files مشكلة.`,`غلط — Hadoop write once.`,`غلط.`],
 tip:`logs = not normalized → Hadoop.`,src:`Lecture 2 · MapReduce vs RDBMS`},
 
-{s:10,t:'m',tp:'rdbms',q:`For which task is an RDBMS a better choice than MapReduce?`,
+{s:9,t:'m',tp:'rdbms',q:`For which task is an RDBMS a better choice than MapReduce?`,
 o:[`Analyzing 5 PB of web logs in batch`,`Updating a single customer's record with low latency`,`Counting words in all books of a library`,`Processing unstructured images`],a:1,
 ex:`السلايد: **An RDBMS is good for point queries or updates, where the dataset has been indexed to deliver low-latency retrieval and update times of a relatively small amount of data.** الباقي كلهم batch على داتا ضخمة أو unstructured = MapReduce.`,
 w:[`غلط — MapReduce.`,`صح.`,`غلط — word count مثال MapReduce الكلاسيكي.`,`غلط — Hadoop.`],
 tip:`single record / update / low latency → RDBMS.`,src:`Lecture 2 · MapReduce vs RDBMS`},
 
-{s:10,t:'m',tp:'patterns',q:`Which processing pattern on Hadoop uses Impala?`,
+{s:9,t:'m',tp:'patterns',q:`Which processing pattern on Hadoop uses Impala?`,
 o:[`Stream processing`,`Search`,`Interactive SQL`,`Iterative processing`],a:2,
 ex:`**Interactive SQL**: distributed query engine بـ **"always on" daemons (like Impala)** أو container reuse (Hive on Tez) → low-latency SQL على Hadoop.`,
 w:[`غلط — Storm / Samza / Spark Streaming.`,`غلط — Solr / ElasticSearch.`,`صح.`,`غلط — Spark in memory.`],
 tip:`Impala → Interactive SQL.`,src:`Lecture 2 · Processing patterns`},
 
 /* ───────────── SET 11 — Midterm-style practice (2) ───────────── */
-{s:11,t:'m',tp:'yarn',q:`What enabled processing models other than MapReduce to run on a Hadoop cluster?`,
+{s:10,t:'m',tp:'yarn',q:`What enabled processing models other than MapReduce to run on a Hadoop cluster?`,
 o:[`HDFS federation`,`The introduction of YARN in Hadoop 2`,`The combiner function`,`SequenceFile`],a:1,
 ex:`السلايد: **The real enabler for new processing models in Hadoop was the introduction of YARN (Yet Another Resource Negotiator) in Hadoop 2.**`,
 w:[`غلط — مش مذكور.`,`صح.`,`غلط.`,`غلط.`],
 tip:`new processing models enabler → YARN.`,src:`Lecture 2 · YARN`},
 
-{s:11,t:'m',tp:'hadoop',q:`Which Hadoop 2 component is the high-performance distributed file system?`,
+{s:10,t:'m',tp:'hadoop',q:`Which Hadoop 2 component is the high-performance distributed file system?`,
 o:[`YARN`,`MapReduce`,`HDFS`,`Hive`],a:2,
 ex:`Hadoop 2 framework: **HDFS = a high performance distributed file system**، YARN = scheduling و resource management، MapReduce = parallel processing.`,
 w:[`غلط.`,`غلط.`,`صح.`,`غلط — Hive مش من الـ 3 core.`],
 tip:`storage → HDFS.`,src:`Lecture 3 · Hadoop 2 framework`},
 
-{s:11,t:'m',tp:'bigdata',q:`Which of the following is NOT one of the 3Vs in the lecture's definition of Big Data?`,
+{s:10,t:'m',tp:'bigdata',q:`Which of the following is NOT one of the 3Vs in the lecture's definition of Big Data?`,
 o:[`Volume`,`Variety`,`Velocity`,`Value`],a:3,
 ex:`الـ 3Vs في السلايد: **Volume, Variety, Velocity**. الـ **Value** مش منهم.`,
 w:[`غلط — من الـ 3Vs.`,`غلط — من الـ 3Vs.`,`غلط — من الـ 3Vs.`,`صح.`],
 tip:`3Vs = Volume · Variety · Velocity.`,src:`Lecture 1 · Introduction`},
 
-{s:11,t:'m',tp:'input',q:`In TextInputFormat, the key is of type:`,
+{s:10,t:'m',tp:'input',q:`In TextInputFormat, the key is of type:`,
 o:[`IntWritable — the line number`,`Text — the first word`,`LongWritable — the byte offset of the beginning of the line`,`NullWritable`],a:2,
 ex:`السلايد: **The key, a LongWritable, is the byte offset within the file of the beginning of the line.** والـ value = Text (محتوى السطر).`,
 w:[`غلط — مش line number ومش IntWritable.`,`غلط.`,`صح.`,`غلط.`],
 tip:`TextInputFormat key = LongWritable offset.`,src:`Lecture 4 · Text input format`},
 
-{s:11,t:'m',tp:'input',q:`Which InputFormat treats everything up to the first tab character as the key?`,
+{s:10,t:'m',tp:'input',q:`Which InputFormat treats everything up to the first tab character as the key?`,
 o:[`TextInputFormat`,`KeyValueTextInputFormat`,`NLineInputFormat`,`SequenceFileInputFormat`],a:1,
 ex:`**KeyValueTextInputFormat**: key = **everything up to the first tab character**، value = **the remainder of the line**. والـ separator قابل للتغيير بالـ property ~mapreduce.input.keyvaluelinerecordreader.key.value.separator~.`,
 w:[`غلط — key = offset.`,`صح.`,`غلط — key = offset.`,`غلط — user-defined.`],
 tip:`first tab → KeyValueTextInputFormat.`,src:`Lecture 4 · Key-value input format`},
 
-{s:11,t:'m',tp:'seq',q:`What makes a SequenceFile splittable?`,
+{s:10,t:'m',tp:'seq',q:`What makes a SequenceFile splittable?`,
 o:[`It is stored as plain text`,`It has sync points that let readers synchronize with record boundaries from an arbitrary point in the file`,`It always fits in one block`,`It is stored in the NameNode`],a:1,
 ex:`السلايد: Sequence files **are splittable (they have sync points so that readers can synchronize with record boundaries from an arbitrary point in the file, such as the start of a split)**.`,
 w:[`غلط — binary.`,`صح.`,`غلط — ممكن يبقى أكتر من block (1 GB = 8 blocks).`,`غلط.`],
 tip:`splittable ← sync points.`,src:`Lecture 4 · Binary input format`},
 
-{s:11,t:'m',tp:'input',q:`A line starts at the end of Block 1 and ends at the beginning of Block 2. How does Hadoop handle it?`,
+{s:10,t:'m',tp:'input',q:`A line starts at the end of Block 1 and ends at the beginning of Block 2. How does Hadoop handle it?`,
 o:[`The line is processed twice, once by each mapper`,`The line is lost`,`The LineRecordReader of the first split reads the whole line, fetching only the extra bytes from Block 2 over the network`,`The job fails`],a:2,
 ex:`**Splits honor logical record boundaries**. الـ split الأول بيحتوي السطر كله، والـ **LineRecordReader** بيجيب الـ bytes الناقصة بس من Block 2 (في المثال ~22 bytes). والـ split التاني يبدأ من السطر اللي بعده. **Avoids duplicates and missing data**.`,
 w:[`غلط — Hadoop بيتجنب الـ duplicates.`,`غلط — بيتجنب الـ missing data.`,`صح.`,`غلط.`],
 tip:`line across blocks → first split + extra bytes.`,src:`Lecture 4 · Website Traffic Analysis scenario`},
 
-{s:11,t:'m',tp:'code',q:`In word count, the reducer is declared as Reducer<Text, IntWritable, Text, IntWritable>. What is the reducer's INPUT value type?`,
+{s:10,t:'m',tp:'code',q:`In word count, the reducer is declared as Reducer<Text, IntWritable, Text, IntWritable>. What is the reducer's INPUT value type?`,
 o:[`Text`,`IntWritable`,`Object`,`LongWritable`],a:1,
 ex:`الترتيب: ~Reducer<input key, input value, output key, output value>~ → input value = **IntWritable**. ولازم يطابق الـ map output value (الـ mapper بيكتب ~new IntWritable(1)~). وفي الـ reduce method بيبقى ~Iterable<IntWritable> values~.`,
 w:[`غلط — ده الـ input key.`,`صح.`,`غلط — ده input key بتاع الـ mapper.`,`غلط.`],
 tip:`2nd generic parameter = input value.`,src:`Lecture 4 · Word count Reducer`},
 
-{s:11,t:'m',tp:'code',q:`Which driver method sets the output key type of the reduce function?`,
+{s:10,t:'m',tp:'code',q:`Which driver method sets the output key type of the reduce function?`,
 o:[`setMapOutputKeyClass()`,`setOutputKeyClass()`,`setMapperClass()`,`setJarByClass()`],a:1,
 ex:`السلايد: **setOutputKeyClass() and setOutputValueClass()** بيتحكموا في output types بتوع الـ **reduce function**. أما ~setMapOutputKeyClass()~ فلما map output يختلف عن reduce output.`,
 w:[`غلط — ده للـ map output.`,`صح.`,`غلط — بيحدد class الـ mapper.`,`غلط — بيحدد الـ jar.`],
 tip:`setOutput... = reduce output.`,src:`Lecture 4 · Word count Driver`},
 
-{s:11,t:'m',tp:'code',q:`Which statement about serialization in Hadoop is correct?`,
+{s:10,t:'m',tp:'code',q:`Which statement about serialization in Hadoop is correct?`,
 o:[`Hadoop uses Java Serializable because it is the lightest option`,`Hadoop uses Writable types because Java Serializable is too heavy; serialization is used for RPC and persistent storage`,`Serialization turns a byte stream into objects`,`Hadoop does not use serialization`],a:1,
 ex:`**Serialization** = structured objects → byte stream (للشبكة أو التخزين). **Deserialization** = العكس. بتستخدم في **interprocess communication (RPC)** و **persistent storage**. وHadoop بيستخدم **Writable** (IntWritable, Text) لأن **Java Serializable is too big or too heavy**.`,
 w:[`غلط — العكس.`,`صح.`,`غلط — ده تعريف deserialization.`,`غلط.`],
 tip:`objects → bytes = serialization. Writable = light.`,src:`Lecture 4 · Serialization`},
 
-{s:11,t:'m',tp:'side',q:`Which mechanism is preferred for distributing side datasets (such as lookup files) to all task nodes?`,
+{s:10,t:'m',tp:'side',q:`Which mechanism is preferred for distributing side datasets (such as lookup files) to all task nodes?`,
 o:[`Job configuration`,`Distributed cache`,`Combiner`,`Shuffle`],a:1,
 ex:`السلايد: **Rather than serializing side data in the job configuration, it is preferable to distribute datasets using Hadoop's distributed cache mechanism.** بيـ copy الملفات للـ nodes قبل الـ tasks، once per job.`,
 w:[`غلط — few KB بس.`,`صح.`,`غلط.`,`غلط.`],
 tip:`datasets / lookup files → distributed cache.`,src:`Lecture 5 · Distributed cache`},
 
-{s:11,t:'m',tp:'side',q:`In the distributed cache, when does a cached file become eligible for deletion from a node?`,
+{s:10,t:'m',tp:'side',q:`In the distributed cache, when does a cached file become eligible for deletion from a node?`,
 o:[`Immediately after it is copied`,`When its reference count reaches zero`,`After every map task`,`When the cache reaches 1 GB`],a:1,
 ex:`الـ node manager بيعمل **reference count** لكل ملف: +1 قبل الـ task، −1 بعدها. **Only when the count reaches zero is it eligible for deletion.** والـ default size للـ cache = 10 GB.`,
 w:[`غلط.`,`صح.`,`غلط — ممكن tasks تانية لسه بتستخدمه.`,`غلط — الـ default 10 GB.`],
 tip:`count = 0 → deletable.`,src:`Lecture 5 · Distributed cache`},
 
-{s:11,t:'m',tp:'join',q:`What is required for a map-side join?`,
+{s:10,t:'m',tp:'join',q:`What is required for a map-side join?`,
 o:[`The input to each map must be partitioned and sorted according to the join keys`,`Records must be tagged with their source`,`Both datasets must go through the shuffle`,`The datasets must be stored in an RDBMS`],a:0,
 ex:`السلايد: في الـ **map side join** الـ mapper بيعمل الـ join، و**it is mandatory that the input to each map is partitioned and sorted according to the keys**. الـ tagging والـ shuffle بتوع الـ reduce-side join.`,
 w:[`صح.`,`غلط — ده reduce-side.`,`غلط — ده reduce-side (وده سبب إنه أبطأ).`,`غلط.`],
 tip:`partitioned & sorted → map-side join.`,src:`Lecture 5 · Join in MapReduce`},
 
-{s:11,t:'m',tp:'join',q:`Why is a reduce-side join less efficient than a map-side join?`,
+{s:10,t:'m',tp:'join',q:`Why is a reduce-side join less efficient than a map-side join?`,
 o:[`Because it requires sorted input`,`Because both datasets have to go through the MapReduce shuffle`,`Because it cannot handle large data`,`Because it runs without a reducer`],a:1,
 ex:`السلايد: reduce-side join **more general** (الـ input مش محتاج structure معين) و **easier to implement**، **but it is less efficient because both datasets have to go through the MapReduce shuffle.**`,
 w:[`غلط — ده شرط الـ map-side.`,`صح.`,`غلط — يقدر.`,`غلط — اسمه reduce-side.`],
 tip:`reduce join slow ← shuffle of both datasets.`,src:`Lecture 5 · Reduce join`},
 
-{s:11,t:'m',tp:'side',q:`Which method of a Mapper or Reducer is used to initialize resources before processing, such as reading a file from the distributed cache into a HashMap?`,
+{s:10,t:'m',tp:'side',q:`Which method of a Mapper or Reducer is used to initialize resources before processing, such as reading a file from the distributed cache into a HashMap?`,
 o:[`map()`,`reduce()`,`setup()`,`main()`],a:2,
 ex:`السلايد: **Setup method is basically an init function, for a given Mapper/Reducer an implementation can be added to initialize/set resources to be used in map or reduce phase.** في المثال الـ reducer قرا ملف الـ customers من ~DistributedCache.getCacheFiles()~ وحطه في HashMap جوه ~setup()~.`,
 w:[`غلط — بتتنادى لكل record.`,`غلط — بتتنادى لكل key.`,`صح.`,`غلط — ده في الـ driver.`],
@@ -1299,10 +1325,9 @@ tip:`initialize once → setup().`,src:`Lecture 5 · Distributed cache`}
 );
 
 window.SETS.push(
-  {n:8,title:`Midterm Fall 2024 (Q1–15)`,ar:`امتحان الميد الحقيقي 12-11-2024 · متصحّح من السلايدز`},
-  {n:9,title:`Midterm Fall 2024 (Q16–25) + 5`,ar:`باقي الامتحان الحقيقي + 5 أسئلة سيناريو جديدة`},
-  {n:10,title:`Midterm-style practice 1`,ar:`أسئلة جديدة بنفس أسلوب الامتحان`},
-  {n:11,title:`Midterm-style practice 2`,ar:`أسئلة جديدة بنفس أسلوب الامتحان`}
+  {n:8,quiz:true,title:`Quiz 1 — Midterm Fall 2024`,ar:`امتحان الميد الحقيقي 12-11-2024 (25 سؤال) · متصحّح من السلايدز`},
+  {n:9,quiz:true,title:`Quiz 2 — Midterm model B`,ar:`25 سؤال جديد بنفس أسلوب وتوزيع الامتحان`},
+  {n:10,quiz:true,title:`Quiz 3 — Midterm model C`,ar:`25 سؤال جديد بنفس أسلوب وتوزيع الامتحان`}
 );
 
 window.TOPICS.yarn={title:`YARN (ResourceManager & ApplicationMaster)`,
@@ -1317,20 +1342,216 @@ window.CORRECTIONS.exam2024=[
  [16,`a. Computation to data`,true],[17,`c. Real-time video processing`,true],[18,`a. Reduced network congestion`,true],[19,`c. Higher network bandwidth usage`,true],[20,`c. Local resources exhausted`,true],
  [21,`d. Higher network latency`,true],[22,`a. Intensive calculations with little data`,true],[23,`c. Large-scale batch processing`,true],[24,`b. Low latency data access`,true],[25,`b. Reduce side join`,true]
 ];
+
+// 15 extra MCQs to complete Quiz 2 (s:9, +5) and Quiz 3 (s:10, +10).
+window.QUESTIONS.push(
+{s:9,t:'m',tp:'hadoop',q:`Which of the following best defines Hadoop?`,
+o:[`A relational database for transactional systems`,`A free software framework for distributed processing of large data sets on clusters of commodity hardware, using simple programming models`,`A single high-performance server for scientific computing`,`A programming language for Big Data`],a:1,
+ex:`تعريف السلايد: **Hadoop is a free software framework developed with the purpose of distributed processing of large data sets using clusters of commodity hardware, implementing simple programming models.** وهو **middleware platform** بيدير cluster من الأجهزة، واتكتب بـ Java.`,
+w:[`غلط — Hadoop مالوش transactions (None).`,`صح.`,`غلط — Hadoop cluster من أجهزة رخيصة مش جهاز واحد.`,`غلط — Hadoop framework مكتوب بـ Java، مش لغة.`],
+tip:`Hadoop = free framework + distributed + commodity clusters + simple programming models.`,src:`Lecture 3 · Definition of Hadoop`},
+
+{s:9,t:'m',tp:'bigdata',q:`Which characteristic of Big Data refers to data coming from a variety of sources?`,
+o:[`Volume`,`Velocity`,`Variety`,`Veracity`],a:2,
+ex:`السلايد: **volume refers to the magnitude of data, variety refers to data come from a variety of sources. Velocity refers to the streamed data collected on real time.**`,
+w:[`غلط — Volume = الحجم.`,`غلط — Velocity = streaming / real time.`,`صح.`,`غلط — مش من الـ 3Vs في السلايد.`],
+tip:`sources / formats → Variety.`,src:`Lecture 1 · Introduction`},
+
+{s:9,t:'m',tp:'patterns',q:`Stream processing is essential when:`,
+o:[`The application must respond quickly (minutes, seconds or milliseconds) and keep state in memory`,`The whole dataset must be analyzed once a month`,`Data is written once and never read`,`ACID transactions are required`],a:0,
+ex:`السلايد: الـ stream processing مهم في حالتين: (1) **lower latency**: لما التطبيق لازم يرد بسرعة (minutes, seconds, milliseconds) فمحتاج streaming system **keeps state in memory**. (2) **more efficient in updating a result than repeated batch jobs** لأنه **incrementalizes the computation**.`,
+w:[`صح.`,`غلط — ده batch.`,`غلط.`,`غلط — مالوش علاقة.`],
+tip:`Stream = low latency + state in memory + incremental updates.`,src:`Lecture 2 · Stream processing`},
+
+{s:9,t:'m',tp:'hadoop',q:`Which Hadoop feature means that if a node goes down, its data can be recovered from other nodes and failures are recovered automatically by the framework?`,
+o:[`Fault tolerance`,`Open source`,`Economic`,`Easy to use`],a:0,
+ex:`الميزة رقم 3: **Fault Tolerance: if any node goes down, data on that node can be recovered from other nodes easily ... Failures of nodes or tasks are recovered automatically by the framework.**`,
+w:[`صح.`,`غلط — تعديل الكود.`,`غلط — commodity hardware.`,`غلط — الـ framework بيتعامل مع التوزيع.`],
+tip:`recovered automatically → Fault tolerance.`,src:`Lecture 3 · Features of Hadoop`},
+
+{s:9,t:'m',tp:'splits',q:`A 300 MB file is stored in HDFS with the default block size. How many blocks does it occupy?`,
+o:[`2`,`3`,`300`,`1`],a:1,
+ex:`الـ default block = **128 MB**. 300 ÷ 128 = 2.34، يعني **2 blocks كاملين (128 + 128) + block تالت فيه 44 MB**. الـ block الأخير مش لازم يبقى مليان. يبقى **3 blocks**، وبالتالي غالبًا 3 splits و 3 map tasks.`,
+w:[`غلط — 256 MB بس، وفاضل 44 MB.`,`صح — 128 + 128 + 44.`,`غلط.`,`غلط — أكبر من block واحد.`],
+tip:`blocks = ceil(file size ÷ 128 MB).`,src:`Lecture 3 · Data Flow / Block vs Split`},
+
+{s:10,t:'m',tp:'rdbms',q:`According to the lecture, which of the following is an example of semi-structured data?`,
+o:[`A database table with a predefined schema`,`A spreadsheet, where the structure is the grid of cells but cells may hold any form of data`,`An image file`,`Plain text`],a:1,
+ex:`السلايد: **Semi-structured data is looser ... for example, a spreadsheet, in which the structure is the grid of cells, although the cells themselves may hold any form of data.** الـ DB tables (و XML حسب السلايد) = structured، والـ image و plain text = unstructured.`,
+w:[`غلط — structured.`,`صح.`,`غلط — unstructured.`,`غلط — unstructured.`],
+tip:`spreadsheet → semi-structured.`,src:`Lecture 2 · MapReduce vs RDBMS`},
+
+{s:10,t:'m',tp:'grid',q:`According to the lecture, what is at the heart of data processing in Hadoop and is the reason for its good performance?`,
+o:[`ACID transactions`,`Data locality`,`Normalization`,`The SAN`],a:1,
+ex:`السلايد: Hadoop بيحاول **co-locate the data with the compute nodes ... This feature, known as data locality, is at the heart of data processing in Hadoop and is the reason for its good performance.**`,
+w:[`غلط.`,`صح.`,`غلط — مشكلة لـ Hadoop.`,`غلط — بتاع HPC.`],
+tip:`heart of Hadoop / good performance → data locality.`,src:`Lecture 2 · Hadoop vs Grid computing`},
+
+{s:10,t:'m',tp:'mr',q:`Which statement about the combiner is TRUE?`,
+o:[`It runs on the reduce output to compress the final result`,`It is a function, just like the reduce function, that runs on the map output to minimize the data shuffled to reducers`,`It replaces the need for reducers`,`It splits files into blocks`],a:1,
+ex:`السلايد: **Hadoop allows the user to specify a combiner function (just like the reduce function) to be run on a map output.** الهدف: **minimize the data shuffled between map and reduce tasks** لأن MapReduce **limited by the bandwidth**. في الـ driver: ~j.setCombinerClass(wordcountreducer.class)~.`,
+w:[`غلط — بيشتغل على map output مش reduce output.`,`صح.`,`غلط — الـ reducer لسه موجود.`,`غلط.`],
+tip:`combiner = on MAP output, before shuffle.`,src:`Lecture 3 · Combiners`},
+
+{s:10,t:'m',tp:'yarn',q:`Who schedules the map and reduce tasks to run on nodes in the cluster?`,
+o:[`The NameNode`,`YARN`,`The combiner`,`The client`],a:1,
+ex:`السلايد (Data Flow): **The tasks are scheduled using YARN and run on nodes in the cluster. If a task fails, it will be automatically rescheduled to run on a different node.**`,
+w:[`غلط — NameNode للـ metadata.`,`صح.`,`غلط.`,`غلط — الـ client بيبعت الـ job بس.`],
+tip:`schedule tasks → YARN.`,src:`Lecture 3 · Data Flow in MapReduce`},
+
+{s:10,t:'m',tp:'input',q:`Using NLineInputFormat with its default setting on a 6-line file, how many mappers receive input?`,
+o:[`1`,`2`,`3`,`6`],a:3,
+ex:`السلايد: **With N set to 1 (the default), each mapper receives exactly one line of input.** يعني 6 سطور = **6 mappers**.`,
+w:[`غلط.`,`غلط — ده لو N = 3.`,`غلط — ده لو N = 2.`,`صح — N = 1 by default.`],
+tip:`NLine default N = 1 → mappers = number of lines.`,src:`Lecture 4 · NLineInputFormat`},
+
+{s:10,t:'m',tp:'seq',q:`As a rule of thumb, how much NameNode RAM does each file, directory or block object occupy?`,
+o:[`About 15 bytes`,`About 150 bytes`,`About 1.5 KB`,`About 128 MB`],a:1,
+ex:`السلايد: **Each file, directory, block in HDFS is represented as object and occupies 150 bytes.** عشان كده 10 مليون ملف ≈ 3 GB من RAM الـ NameNode، ومليار ملف مش ممكن.`,
+w:[`غلط.`,`صح.`,`غلط — 1.4 KB ده إجمالي 9 objects.`,`غلط — ده حجم الـ block.`],
+tip:`~150 bytes per object.`,src:`Lecture 4 · SequenceFile`},
+
+{s:10,t:'m',tp:'input',q:`Which RecordReader converts raw bytes into (byte offset, line) pairs and handles lines that cross block boundaries?`,
+o:[`SequenceFileRecordReader`,`LineRecordReader`,`KeyValueRecordReader`,`InputSplit`],a:1,
+ex:`سيناريو Website Traffic: **Each Mapper uses a LineRecordReader to convert raw bytes into (key, value) pairs. Key: Byte offset ... Value: The full text line. LineRecordReader is smart enough to handle lines that cross block boundaries.**`,
+w:[`غلط — للـ binary.`,`صح.`,`غلط — مش اللي في السلايد.`,`غلط — InputSplit بيحدد الجزء، مش بيقرا.`],
+tip:`line across blocks → LineRecordReader.`,src:`Lecture 4 · Website Traffic Analysis`},
+
+{s:10,t:'m',tp:'side',q:`Hadoop's Configuration object stores values as:`,
+o:[`Java objects of any type`,`Strings only`,`Binary blocks`,`HDFS files`],a:1,
+ex:`السلايد: **Hadoop Configuration stores values as Strings only. We cannot store Java objects directly.** الحل: تحوّل الـ object لـ String بنفسك أو تستخدم **DefaultStringifier**، والـ mapper يقراه في ~setup()~.`,
+w:[`غلط — لازم تتحول String.`,`صح.`,`غلط.`,`غلط — ده الـ distributed cache.`],
+tip:`Configuration = Strings → DefaultStringifier.`,src:`Lecture 5 · Side data example`},
+
+{s:10,t:'m',tp:'join',q:`In the reduce-side join example, what does a reducer receive after the shuffle and sort phase?`,
+o:[`One record from the customer file only`,`A join key (customer ID) with a list of tagged values from both datasets, e.g. {4000001 – [(cname kristina), (camount 40.33), …]}`,`The whole transaction file`,`Only the amounts, already summed by the mapper`],a:1,
+ex:`mapper1 بيطلع [4000001, cname Kristina]، و mapper2 بيطلع [4000001, camount 40.33]. **After the sorting and shuffling phase, a key and the list of values is generated for the reducer**: {4000001 – [(cname kristina), (camount 40.33), (camount 47.05), …]}. الـ reducer بيفرّق بالـ tag: لو cname ياخد الاسم، لو camount يجمع.`,
+w:[`غلط.`,`صح.`,`غلط.`,`غلط — الجمع في الـ reducer.`],
+tip:`reducer gets: key + list of tagged values from both sources.`,src:`Lecture 5 · Reduce join`},
+
+{s:10,t:'m',tp:'join',q:`Writing joins in MapReduce from scratch is fairly involved. What does the lecture suggest instead?`,
+o:[`Using a traditional RDBMS only`,`Using a higher-level framework such as Pig, Hive or Spark, where joins are a core part of the implementation`,`Avoiding joins entirely`,`Using the distributed cache for both large datasets`],a:1,
+ex:`السلايد: **Rather than writing MapReduce programs, you might consider using a higher-level framework such as Pig, Hive, or Spark, in which join operations are a core part of the implementation.**`,
+w:[`غلط.`,`صح.`,`غلط — Hadoop يقدر يعمل joins.`,`غلط — الـ cache للـ dataset الصغيرة بس.`],
+tip:`joins easier → Pig / Hive / Spark.`,src:`Lecture 5 · Join in MapReduce`}
+);
+
+// Lecture-by-lecture explanation + organized exam hints.
+// Each lecture: sections [heading, paragraphs[], optional table {h:[...], r:[[...]]}]
+window.LECTURES = [
+{n:1,title:`Lecture 1 — Introduction to the course & Big Data`,topics:['bigdata'],
+intro:`أول محاضرة تعريفية: الكورس هيمشي إزاي، وإيه هي الـ Big Data ولیه الأدوات القديمة مش كفاية.`,
+secs:[
+ [`الكورس والدرجات`,[`الميدترم **30%**، المشروع **20%**، الفاينال **50%**. المنهج: Intro → MapReduce 1 → MapReduce 2 → HDFS → Hive → YARN → **Midterm** → Spark → Sqoop → HBase → Kafka.`,`الكتب: **Hadoop: The Definitive Guide** (Tom White) و **Spark: The Definitive Guide**. أغلب سلايدات المحاضرات من كتاب Hadoop، وعشان كده أسئلة الامتحان ساعات بتيجي من الكتاب.`]],
+ [`يعني إيه Big Data؟`,[`أشهر تعريف بيوصفها بـ 3 خصائص اسمهم **3Vs**:`],{h:[`V`,`المعنى`,`مثال`],r:[[`Volume`,`حجم الداتا (magnitude)`,`Petabytes من الـ logs`],[`Variety`,`الداتا جاية من مصادر وأشكال كتير`,`جداول + نصوص + صور`],[`Velocity`,`الداتا بتيجي streaming وبتتجمع real time`,`clicks و sensor readings`]]}],
+ [`تعريف McKinsey`,[`Big Data هي داتا **scale, distribution, diversity, and/or timeliness** بتاعتها محتاجة **new technical architectures and analytics** عشان تطلع منها insights ليها قيمة للبيزنس.`,`الشركات محتاجة **new data architectures, analytic sandboxes, new tools, new analytical methods**.`,`والنقطة الأهم: **Traditional methods and databases can not handle big data**. الحجم الكبير محتاج أدوات جديدة للتخزين والإدارة، وده سبب وجود Hadoop.`]]
+]},
+
+{n:2,title:`Lecture 2 — Introduction to Big Data processing`,topics:['engines','patterns','rdbms','grid','yarn'],
+intro:`أهم محاضرة في الميد: فيها 3 جداول مقارنة بيتسأل منهم كتير (MapReduce vs Spark vs Flink، و MapReduce vs RDBMS، و Hadoop vs Grid)، وكمان أنماط المعالجة و YARN.`,
+secs:[
+ [`MapReduce vs Spark vs Flink`,[`الـ 3 بيعملوا **batch processing**. الفرق في 3 صفوف، وكل سؤال بيعتمد على كلمة واحدة:`],{h:[``,`MapReduce`,`Spark`,`Flink`],r:[[`Execution`,`Batch بس`,`Batch + **Near real time**`,`Batch + **Real time**`],[`Interactive`,`**No support**`,`Support`,`Support`],[`Iterative`,`**Not suitable**`,`**Suitable**`,`**Native**`]]}],
+ [`Processing patterns with Hadoop`,[`**Interactive SQL**: بيستغنى عن MapReduce ويستخدم distributed query engine بـ daemons شغالة على طول (**Impala**) أو container reuse (**Hive on Tez**) → low-latency SQL على داتا ضخمة.`,`**Iterative processing**: خوارزميات زي الـ machine learning بتلف كذا مرة على نفس الداتا. الأكفأ تخلي الـ **working set in memory** بدل ما تقراه من الـ disk كل مرة. MapReduce مايسمحش بده، و Spark يسمح.`,`**Stream processing**: **Storm, Spark Streaming, Samza** بيعملوا حسابات real time على **unbounded streams** ويكتبوا النتايج على Hadoop أو أنظمة تانية.`,`**Search**: **Solr** بيعمل indexing للمستندات وهي بتتضاف على HDFS ويرد على search queries. و **ElasticSearch** للـ information retrieval.`]],
+ [`ليه لسه بنذاكر MapReduce؟`,[`لأنه لسه ليه مكان في الـ **batch processing**، وبيعلّم مفاهيم عامة زي **input formats** وإزاي الـ dataset بتتقسم لأجزاء.`,`MapReduce **fundamentally batch** ومش مناسب للـ interactive: الـ query بتاخد دقايق أو أكتر، فمناسب للـ **offline use**.`,`كلمة **Hadoop** ساعات بتتقال على **ecosystem** كامل من المشاريع، مش HDFS و MapReduce بس.`]],
+ [`Stream processing بالتفصيل`,[`هو **continuously incorporating new data to compute a result**، والـ input **unbounded** (events بتيجي باستمرار: credit card transactions، clicks، IoT sensors).`,`مهم في حالتين: (1) **lower latency**: التطبيق لازم يرد في دقايق أو ثواني أو milliseconds، فمحتاج يحتفظ بالـ state في الـ memory. (2) **أكفأ في تحديث النتيجة** من batch jobs متكررة لأنه بيحسب incremental.`]],
+ [`YARN`,[`**Yet Another Resource Negotiator**، اتضاف في **Hadoop 2**، وهو **cluster resource management system**. هو **the real enabler for new processing models**، لأنه بيسمح لأي distributed program (مش MapReduce بس) يشتغل على داتا الـ cluster.`,`من الكتاب (اتسأل في امتحان 2024): الـ **ApplicationMaster** بيكلم الـ **ResourceManager** بـ **RPC**، والـ **scheduler** بيرفض أي application بتطلب resources مستحيلة.`]],
+ [`MapReduce vs traditional database`,[`MapReduce **مكمّل** للـ RDBMS مش بديل. MapReduce مناسب لتحليل **الداتا كلها batch**، والـ RDBMS مناسب للـ **point queries/updates** على داتا indexed بسرعة. احفظ الجدول ده صف صف:`],{h:[``,`Traditional RDBMS`,`MapReduce`],r:[[`Data size`,`Gigabytes`,`Petabytes`],[`Access`,`Interactive and batch`,`Batch`],[`Updates`,`Read and write many times`,`Write once, read many times`],[`Transactions`,`ACID`,`None`],[`Structure`,`Schema-on-write`,`Schema-on-read`],[`Integrity`,`High`,`Low`],[`Scaling`,`Nonlinear`,`Linear`]]}],
+ [`أنواع الداتا و Schema`,[`**Structured**: entities ليها defined format و predefined schema، زي **XML documents** و **database tables** (ده كلام السلايد بالحرف، فلو جت XML في السؤال اختار structured).`,`**Semi-structured**: أضعف؛ ممكن يبقى فيه schema بس غالبًا بتتجاهل وبتستخدم كـ guide بس. مثالها **spreadsheet**.`,`**Unstructured**: مالهاش internal structure، زي **plain text** و **image data**.`,`Hadoop شغال كويس على الـ unstructured و semi-structured لأنه بيعمل **schema-on-read**: بيفسّر الداتا وقت المعالجة، فيدي flexibility ويتجنب مرحلة الـ loading المكلفة (التحميل مجرد file copy). العيب: شغل أكتر وقت القراءة ومفيش ضمان على جودة الداتا.`]],
+ [`Normalization و Logs و Scaling`,[`الـ RDBMS بيعمل **normalization** للـ integrity وإزالة التكرار، لكنه بيخلي قراءة الـ record **nonlocal operation**، وده ضد افتراض Hadoop إنه يعمل **high-speed streaming reads and writes**.`,`الـ **web server log** مش normalized (اسم الـ client بيتكتب كامل كل مرة)، وعشان كده الـ logs مناسبة جدًا لـ Hadoop. وHadoop **يقدر يعمل joins** بس مش بيستخدمها كتير زي RDBMS.`,`**Linear scaling**: لو ضاعفت الداتا، الـ job هيبقى أبطأ مرتين. لو ضاعفت الداتا والـ cluster، هيشتغل بنفس السرعة.`]],
+ [`Hadoop vs Grid computing (HPC)`,[`الـ HPC بيستخدم **MPI** وبيوزع الشغل على أجهزة بتقرا من **shared file system على SAN**. ده كويس للـ compute-intensive، لكن مع مئات الـ GB تبقى **network bandwidth** هي الـ bottleneck والأجهزة تقعد مستنية.`],{h:[``,`Grid / HPC (MPI)`,`Hadoop`],r:[[`Data access`,`Shared file system على SAN`,`**Data locality**: الداتا جنب الحساب`],[`Programming`,`Data flow exposed by **low level**`,`**High level**`],[`Failure`,`المبرمج بيدير checkpointing و recovery`,`الـ MapReduce engine تلقائي`],[`Cost`,`Highly expensive`,`Commodity hardware`],[`Network`,`—`,`Models network topology لتوفير الـ bandwidth`]]}],
+ [`Partial failure و Shared-nothing`,[`**Network bandwidth is the most precious resource** في الـ data center، و Hadoop بيحافظ عليها بـ **modeling network topology**.`,`أصعب حاجة في الـ distributed computation: **partial failure** (مش عارف الـ remote process وقع ولا لأ) وإنك تكمل برضه.`,`MapReduce بيكتشف الـ failed tasks ويعيدها على أجهزة سليمة لأنه **shared-nothing architecture**: الـ tasks مش معتمدة على بعض، فترتيب تشغيلها مش مهم. استثناء: إعادة تشغيل **reducer** فاشل محتاجة عناية أكتر من الـ map، لأنه لازم يجيب الـ map outputs (أو يعيد تشغيل الـ maps).`,`MPI بيدي **more control** للمبرمج بس الكود **أصعب في الكتابة**.`]]
+]},
+
+{n:3,title:`Lecture 3 — Hadoop & MapReduce`,topics:['hadoop','mr','splits'],
+intro:`تعريف Hadoop ومكوناته ومميزاته التسعة، وبعدين إزاي MapReduce بيشتغل من أول الـ splits لحد الـ reducers، وموضوع الـ data locality.`,
+secs:[
+ [`تعريف Hadoop`,[`Hadoop **free software framework** للـ distributed processing لداتا كبيرة على **clusters of commodity hardware** بـ simple programming models. هو **middleware platform** بيدير cluster، واتكتب بـ **Java** (لكن ممكن R و Python و Ruby).`]],
+ [`Hadoop 2 framework`,[],{h:[`المكوّن`,`وظيفته`],r:[[`HDFS`,`high performance distributed file system (التخزين)`],[`YARN`,`job scheduling and cluster resource management`],[`MapReduce`,`parallel processing بتطبيق الـ MapReduce model`]]}],
+ [`مميزات Hadoop التسعة`,[`ركّز في الفرق بين **Fault tolerance** و **Reliability** و **High availability** لأنهم شبه بعض:`],{h:[`الميزة`,`الكلمة المفتاحية في السؤال`],r:[[`1. Open source`,`code can be modified according to business requirements`],[`2. Distributed processing`,`data stored distributed in HDFS → processed in parallel`],[`3. Fault tolerance`,`node goes down → recovered from other nodes · **recovered automatically**`],[`4. Reliability`,`replication → data **stored reliably** despite failures`],[`5. High availability`,`multiple copies → **accessed from another path**`],[`6. Scalability`,`**horizontal**: add nodes **on the fly without downtime**`],[`7. Economic`,`**commodity hardware**، no specialized machine`],[`8. Easy to use`,`client doesn't deal with distributed computing`],[`9. Data locality`,`**algorithm moved to data**، not data to algorithm`]]}],
+ [`NameNode و DataNode (HDFS)`,[`**NameNode** = master و metadata manager: أسماء الملفات وأماكنها، إزاي الملف اتقسم لـ blocks، وأنهي DataNode شايل كل block. **مش بيخزن الداتا**.`,`**DataNode** = بيخزن الـ blocks الفعلية على local disk، يخدم read/write، يبعت status للـ NameNode، ويعمل replication للـ fault tolerance.`]],
+ [`MapReduce framework`,[`الشغل بيتقسم لمرحلتين **map** و **reduce**، وكل مرحلة input و output بتوعها **key-value pairs** والمبرمج بيختار الأنواع. الـ **Mapper** و الـ **Reducer** generic types بـ **4 type parameters**: input key, input value, output key, output value.`,`**Mapper**: برنامج صغير بيقرا جزء من الداتا، يفلتر أو يحوّل، ويطلع stream من <key, value>. الـ framework بيبعته لكل جهاز عليه block من الملف، وكل ما الملف والـ cluster يكبروا الـ mappers تزيد.`,`**Shuffle**: نقل وترتيب مخرجات الـ mappers للـ reducers حسب الـ key.`,`**Reducer**: آخر مرحلة. بيرتب و/أو يجمع كل الـ values لنفس الـ key (زي إجمالي المبيعات لكل state)، ويكتب الناتج على storage. **More unique keys = more parallelism**.`,`**Combiner**: function زي الـ reduce بتشتغل على **map output**، عشان تقلل الداتا اللي بتتعمل لها shuffle، لأن MapReduce محدود بالـ bandwidth. مثال word count: بدل (the,1)(the,1)(the,1) يبعت (the,3).`]],
+ [`Data flow: Job → Tasks → Splits`,[`**MapReduce job** = input data + MapReduce program + configuration information. Hadoop بيقسمه لـ **map tasks** و **reduce tasks**، بتتجدول بـ **YARN**، ولو task فشل بيتعاد تلقائي على **node تاني**.`,`الـ input بيتقسم لـ **input splits** بحجم ثابت، و **map task واحد لكل split**.`,`splits صغيرة = **load balancing أحسن** (الجهاز الأسرع ياخد splits أكتر). لكن لو صغيرة أوي، الـ **overhead** بتاع إدارة الـ splits وإنشاء الـ tasks يغلب.`,`الأفضل: **split = HDFS block = 128 MB** (default)، لأنه **أكبر حجم مضمون يبقى على node واحد**. لو الـ split امتد على 2 blocks غالبًا جزء منه هيتنقل على الشبكة.`]],
+ [`Data locality`,[`Hadoop بيحاول يشغّل الـ map task على الـ node اللي عليه الداتا عشان مايستهلكش bandwidth. فيه 3 حالات بالترتيب:`],{h:[`الحالة`,`يعني إيه`,`أثرها`],r:[[`(a) Data-local`,`نفس الـ node اللي عليه الـ block`,`الأفضل، reduced network congestion`],[`(b) Rack-local`,`الـ nodes اللي عليها replicas مشغولة، فـ node تاني في نفس الـ rack`,`network latency أعلى من data-local`],[`(c) Off-rack`,`ولا ده متاح (local resources exhausted)، فـ node في rack تاني`,`inter-rack transfer → higher bandwidth usage`]]}],
+ [`Map output و Reduce`,[`الـ map tasks بتكتب الـ output على **local disk** مش HDFS، لأنه **intermediate output** هيتعالج في الـ reducers وبعدين يترمي.`,`الـ **reduce tasks مالهاش data locality**، لأن الـ input بتاع reducer واحد جاي من **كل الـ mappers**.`]]
+]},
+
+{n:4,title:`Lecture 4 — Reading data: InputFormat, SequenceFile, code`,topics:['input','seq','code'],
+intro:`إزاي MapReduce بيقرا الداتا: الـ InputFormats الأربعة، الفرق بين الـ split والـ block، مشكلة الـ small files وحلها، وكود الـ word count.`,
+secs:[
+ [`3 classes لقراءة الداتا`,[],{h:[`Class`,`السؤال اللي بتجاوبه`],r:[[`InputFormat`,`**How** — إزاي الداتا تتقرا وتتقسم (المخطِّط)`],[`InputSplit`,`**What** — أنهي جزء هيتعالج (chunk منطقي لـ mapper واحد)`],[`RecordReader`,`**Actually reads** — بيقرا الـ bytes ويحولها لـ (key, value)`]]}],
+ [`أنواع الـ InputFormat`,[`ده أكتر جدول بيتسأل منه في المحاضرة:`],{h:[`InputFormat`,`Key`,`Value`,`ملاحظة`],r:[[`TextInputFormat (**default**)`,`byte offset (LongWritable)`,`السطر (Text)`,`عدد سطور متغير لكل mapper`],[`KeyValueTextInputFormat`,`كل حاجة لحد **أول tab**`,`باقي السطر`,`الـ separator قابل للتغيير، tab by default`],[`NLineInputFormat`,`byte offset`,`السطر`,`**عدد ثابت N** لكل mapper، N = 1 default`],[`SequenceFileInputFormat`,`user-defined`,`user-defined`,`**Binary**`]]}],
+ [`حساب الـ byte offset`,[`الـ key في TextInputFormat **مش رقم السطر**، ده عدد الـ bytes من أول الملف لبداية السطر. القاعدة: **offset التالي = offset السابق + طول السطر + 1 (newline)**.`,`مثال السلايد: "On the top of the Crumpetty Tree" طوله 32 → السطر التاني يبدأ عند **33**. "The Quangle Wangle sat," طوله 23 → التالت عند **57**. والرابع عند **89**.`,`مع **NLineInputFormat** و N = 2 على نفس الـ 4 سطور: mapper ياخد (0)(33) و mapper تاني ياخد (57)(89). نفس الـ keys والـ values، **الفرق في construction of splits**.`]],
+ [`Split vs Block`,[`**Block** = **storage** concept: وحدة فيزيائية في HDFS، 128 MB، ليها replicas.`,`**Split** = **processing** concept: تقسيم **logical**، كل split لـ mapper واحد، **respects record boundaries**، وغالبًا (مش دايمًا) بيساوي الـ block.`,`لو سطر بدأ في Block 1 وخلص في Block 2: بيتبع **الـ split الأول**، والـ **LineRecordReader** بيجيب الـ bytes الزيادة بس من Block 2 على الشبكة (~22 bytes في مثال الـ Website Traffic). مفيش duplicates ولا missing data، والـ split التاني يبدأ من السطر اللي بعده.`]],
+ [`SequenceFile و مشكلة الـ small files`,[`الـ **small file** = ملف أصغر بكتير من الـ block. المشكلة على وجهين:`,`**HDFS**: كل file و block = **object ~150 bytes** في RAM الـ NameNode. الملف الصغير = 2 objects (File object + Block object). 10 مليون ملف ≈ 3 GB، ومليار ملف مش ممكن.`,`**MapReduce**: كل ملف صغير = split = mapper لوحده، وتشغيل mapper عشان يقرا 100 KB أغلى من الشغل نفسه.`,`**الحل: SequenceFile** يجمع الملفات الصغيرة في ملف واحد (**filename = key، content = value**). وهو مناسب لـ MapReduce لأنه **splittable** (sync points)، بيدعم **compression**، وبيخزن arbitrary types.`],{h:[``,`قبل (10,000 ملف × 100 KB)`,`بعد (SequenceFile 1 GB)`],r:[[`Files`,`10,000`,`1`],[`Blocks`,`10,000`,`8 (1 GB ÷ 128 MB)`],[`NameNode objects`,`~20,000`,`9`],[`NameNode RAM`,`~3 MB`,`~1.4 KB`],[`Mappers`,`~10,000`,`~8`]]}],
+ [`كود الـ Word count`,[`**Mapper**: ~Mapper<Object, Text, Text, IntWritable>~: input key Object، input value Text (السطر)، output key Text (الكلمة)، output value IntWritable (1). بيعمل ~context.write(new Text(x), new IntWritable(1))~ لكل كلمة.`,`**Reducer**: ~Reducer<Text, IntWritable, Text, IntWritable>~: بيجمع الـ 1s لكل كلمة. **input types للـ reduce لازم تطابق output types للـ map**.`,`**Driver**: ~setMapperClass~، ~setReducerClass~، ~setCombinerClass~ (اختياري)، ~setOutputKeyClass / setOutputValueClass~ (= نوع output الـ **reduce**)، و ~setMapOutputKeyClass / setMapOutputValueClass~ **بس لو** output الـ map مختلف عن output الـ reduce.`]],
+ [`Serialization`,[`**Serialization** = تحويل structured objects لـ **byte stream** (للشبكة أو التخزين). **Deserialization** = العكس.`,`بتستخدم في **interprocess communication** (عن طريق **RPC**: الرسالة تتحول binary stream وتتبعت للـ remote node اللي يعمل deserialize) وفي **persistent storage**.`,`Hadoop بيستخدم **IntWritable و Text** بدل int و String لأن **Java Serializable تقيلة**، والـ **Writable** خفيفة.`]],
+ [`Hadoop مناسب لإيه ومش مناسب لإيه`,[],{h:[`Good for`,`Not good for`],r:[[`Massive amounts of data through parallelism`,`Transactions (random access)`],[`Variety of data (structured, unstructured, semi)`,`Work that cannot be parallelized`],[`Inexpensive commodity hardware`,`Low latency data access`],[``,`Lots of small files`],[``,`Intensive calculations with little data`]]}]
+]},
+
+{n:5,title:`Lecture 5 — Side data, distributed cache & joins`,topics:['side','join'],
+intro:`إزاي توصّل داتا إضافية لكل الـ tasks (side data)، والفرق بين الـ job configuration و الـ distributed cache، وإزاي تعمل join في MapReduce.`,
+secs:[
+ [`Side data`,[`**Side data** = داتا إضافية **read-only** الـ job محتاجها عشان يعالج الداتا الأساسية. مثال: لستة مدن مسموحة [Cairo, Alex] عشان تفلتر الناس، أو ملف أسماء العملاء. التحدي: توصّلها لكل الـ map/reduce tasks المتوزعة بشكل فعال. فيه طريقتين.`]],
+ [`1) Job Configuration`,[`تعمل set لـ key-value pairs في الـ Configuration في الـ driver، والـ task يقراها بـ ~context.getConfiguration()~، وغالبًا جوه ~setup()~.`,`الـ Configuration بتخزن **Strings بس**، فلأي Java object يا إما تعمل serialization بنفسك يا إما تستخدم **DefaultStringifier**.`,`**ماتستخدمهاش لأكتر من few KB**: الـ configuration بتتقرا من الـ client والـ application master والـ task JVM، وكل مرة كل الـ entries تدخل الـ memory حتى لو مش مستخدمة.`]],
+ [`2) Distributed cache`,[`الأفضل لتوزيع datasets (زي **lookup files**). بيـ copy الملفات والـ archives للـ task nodes قبل ما الـ tasks تشتغل، و**once per job** لكل node لتوفير الـ bandwidth.`,`الخطوات: (1) copy الملف لـ HDFS (2) setup job configuration. لما يتنسخ على الـ node يتقال إنه **localized**.`,`الـ **default size = 10 GB** وبيتظبط في **mapred-site.xml**.`,`الـ node manager بيعمل **reference count**: +1 قبل الـ task، −1 بعدها، والملف ينفع يتمسح **لما الـ count يوصل صفر**.`,`**setup()** = init function في الـ Mapper/Reducer تجهز resources قبل المعالجة. في المثال الـ reducer قرا ملف الـ customers من ~DistributedCache.getCacheFiles()~ وحطه في HashMap، وبعدين في ~reduce()~ جمع المبالغ وجاب الاسم من الـ HashMap.`]],
+ [`Joins in MapReduce`,[`MapReduce يقدر يعمل join بين datasets كبيرة، بس كتابته من الصفر معقدة، فالأحسن أدوات أعلى زي **Pig, Hive, Spark**. ولو الـ datasets الاتنين كبار أوي ومش ممكن تنسخ واحدة على كل node، تقدر برضه تعمل map-side أو reduce-side join.`],{h:[``,`Map-side join`,`Reduce-side join`],r:[[`فين بيحصل`,`في الـ mapper`,`في الـ reducer`],[`الشرط`,`input كل map لازم **partitioned and sorted** by key`,`مفيش شرط على الـ structure (more general)`],[`السهولة`,`أصعب`,`**أسهل في الكتابة**`],[`الكفاءة`,`أكفأ`,`**less efficient**: الـ datasets الاتنين بيعدّوا على الـ shuffle`]]}],
+ [`Reduce join خطوة بخطوة`,[`1. كل mapper بيقرا dataset (mapper1 للـ customers، mapper2 للـ transactions).`,`2. الـ mapper بيعمل **tag** لكل record بمصدره ("cname" أو "camount").`,`3. الـ output key = **join key** (customer ID). مثال: [4000001, cname Kristina] و [4000001, camount 40.33].`,`4. بعد الـ shuffle والـ sort: {4000001 – [(cname kristina), (camount 40.33), (camount 47.05), …]}.`,`5. الـ reducer يفرّق بالـ tag: ياخد الاسم ويجمع المبالغ، ويطلع (الاسم، الإجمالي).`,`في الـ driver: ~MultipleInputs.addInputPath(job, path, TextInputFormat.class, mapper1.class)~ لكل dataset بالـ mapper بتاعها.`]]
+]}
+];
+
+window.HINTS = {
+numbers:[[`128 MB`,`default HDFS block size = optimal split size`],[`150 bytes`,`كل object (file / block) في RAM الـ NameNode`],[`2 objects`,`كل ملف صغير (File + Block)`],[`20,000 ≈ 3 MB`,`10,000 ملف صغير`],[`9 ≈ 1.4 KB`,`1 GB SequenceFile (1 file + 8 blocks)`],[`10 مليون ملف ≈ 3 GB`,`ذاكرة الـ NameNode`],[`10 GB`,`default size للـ distributed cache (mapred-site.xml)`],[`N = 1`,`default في NLineInputFormat`],[`4`,`عدد الـ generic type parameters في Mapper / Reducer`],[`0 · 33 · 57 · 89`,`offsets مثال الـ Crumpetty Tree`],[`3Vs`,`Volume · Variety · Velocity`],[`Hadoop 2`,`ظهور YARN`],[`30 / 20 / 50`,`Midterm / Project / Final`]],
+traps:[
+ [`Real time vs near real time`,`real time = **Flink**. near real time = **Spark**. (ورقة الميد 2024 كانت معلّمة Spark في سؤال 15، والسلايد بيقول Flink.)`],
+ [`Native vs suitable iterative`,`native = **Flink**، suitable = **Spark**، not suitable = MapReduce.`],
+ [`XML`,`حسب السلايد XML = **structured**، مش semi. الـ semi مثالها spreadsheet.`],
+ [`TextInputFormat key`,`**byte offset** (LongWritable)، مش line number.`],
+ [`Low level programming`,`ده **Grid**، Hadoop = high level. أي سؤال بيقول "low level in MapReduce" = False.`],
+ [`Reliability / HA / Fault tolerance`,`stored reliably = Reliability · another path = HA · recovered automatically = Fault tolerance.`],
+ [`Map output`,`**local disk**، مش HDFS.`],
+ [`Data locality للـ reducers`,`**مفيش**. الـ data locality للـ map tasks بس.`],
+ [`Combiner`,`بيشتغل على **map output** (مش reduce output) ومش بيلغي الـ reducer.`],
+ [`Fixed lines per mapper`,`**NLineInputFormat** بس. Text و KeyValue = variable.`],
+ [`Block vs Split`,`Block = physical / storage. Split = logical / processing. أي جملة معكوسة = False.`],
+ [`Distributed cache copy`,`**once per job** لكل node، مش once per task.`],
+ [`Job configuration`,`few KB بس و Strings بس. الكبير → distributed cache.`],
+ [`Two very large files`,`**MapReduce join** (map-side أو reduce-side)، مش distributed cache.`],
+ [`Reduce join`,`أسهل وأعم بس **أبطأ** (shuffle للـ datasets الاتنين). الـ tag = reduce join.`],
+ [`NameNode`,`metadata بس. "stores actual data" = False.`],
+ [`EXCEPT / NOT`,`اقلب السؤال: دوّر على العنصر اللي من القايمة التانية (good for vs not good for).`],
+ [`Double data + double cluster`,`**نفس الوقت** (linear scaling). Double data بس = ضعف الوقت.`]
+],
+compare:[
+ {t:`Job configuration vs Distributed cache`,h:[``,`Job configuration`,`Distributed cache`],r:[[`الحجم`,`few KB`,`لحد 10 GB default`],[`النوع`,`Strings (DefaultStringifier للـ objects)`,`files و archives`],[`مثال`,`لستة مدن صغيرة`,`lookup file / customer details`],[`القراءة`,`context.getConfiguration() في setup()`,`DistributedCache.getCacheFiles() في setup()`]]},
+ {t:`Schema-on-write vs Schema-on-read`,h:[``,`Schema-on-write (DB)`,`Schema-on-read (Hadoop)`],r:[[`امتى الـ schema`,`وقت الكتابة`,`وقت القراءة / المعالجة`],[`الميزة`,`data integrity عالية، queries سريعة`,`flexibility، تحميل سريع (file copy)`],[`العيب`,`أقل flexibility، write cost أعلى`,`شغل أكتر وقت القراءة، مفيش ضمان جودة`],[`مناسب لـ`,`structured، transactional`,`logs، semi و unstructured`]]},
+ {t:`NameNode vs DataNode`,h:[``,`NameNode`,`DataNode`],r:[[`الدور`,`master، metadata manager`,`data storage`],[`بيخزن`,`file names، block mapping، أماكن الـ blocks`,`الـ blocks الفعلية على local disk`],[`ملاحظة`,`مش بيخزن داتا · RAM بتتملي مع الـ small files`,`replicates data · بيبعت status للـ NameNode`]]}
+]
+};
+
+// Short English summary per lecture (shown under the Arabic explanation).
+window.LECTURES_EN = {
+1:[`Big Data is most widely defined by the **3Vs**: **Volume** (magnitude), **Variety** (many sources and formats) and **Velocity** (streamed, collected in real time).`,`McKinsey: Big Data is data whose scale, distribution, diversity and/or timeliness require **new technical architectures and analytics**.`,`Traditional methods and databases **cannot** handle big data; new tools are needed to store and manage it.`,`Grading: Midterm 30%, Project 20%, Final 50%.`],
+2:[`All three engines do **batch**. Spark adds **near real time**, Flink adds **real time**. MapReduce has **no interactive** support and is **not suitable** for iterative work; Spark is **suitable**, Flink is **native** iterative.`,`Processing patterns: **Interactive SQL** (Impala, Hive on Tez), **Iterative** (keep working set in memory, e.g. Spark for ML), **Stream** (Storm, Spark Streaming, Samza on unbounded data), **Search** (Solr, ElasticSearch).`,`**YARN** (Yet Another Resource Negotiator, Hadoop 2) is a cluster resource manager that lets any distributed program, not just MapReduce, run on Hadoop.`,`MapReduce vs RDBMS: PB vs GB · batch vs interactive+batch · write once read many vs read/write many · no transactions vs ACID · **schema-on-read** vs schema-on-write · low vs high integrity · **linear** vs nonlinear scaling.`,`Structured = predefined schema (XML, DB tables). Semi-structured = loose schema used as a guide (spreadsheet). Unstructured = no internal structure (plain text, images).`,`Normalization makes record reads nonlocal, which hurts Hadoop's streaming reads; web logs are not normalized, so they suit Hadoop.`,`Grid/HPC uses **MPI** and a shared file system on a **SAN**; network bandwidth becomes the bottleneck. Hadoop uses **data locality**, high-level programming, automatic failure handling and cheap commodity hardware.`,`Network bandwidth is the most precious resource. The hardest problem is **partial failure**. MapReduce is **shared-nothing**: tasks are independent, so order does not matter.`],
+3:[`Hadoop is a free Java framework for distributed processing of large data sets on clusters of commodity hardware. Hadoop 2 = **HDFS** (storage) + **YARN** (scheduling, resources) + **MapReduce** (processing).`,`Nine features: open source, distributed processing, fault tolerance (automatic recovery), reliability (replication), high availability (another path), horizontal scalability (no downtime), economic, easy to use, data locality (move code to data).`,`**NameNode** keeps metadata only; **DataNodes** store the actual blocks.`,`Map and reduce phases both use **key-value pairs**. Mapper and Reducer each have **4 type parameters**. Mappers filter/transform and emit (k,v); reducers aggregate per key; a **combiner** runs on map output to cut shuffled data.`,`A job = input data + program + configuration, split into map and reduce tasks scheduled by YARN; failed tasks rerun on another node.`,`One map task per **input split**. Best split size = **HDFS block (128 MB)**, the largest input guaranteed to sit on one node.`,`Data-local (same node) > rack-local (same rack) > off-rack (inter-rack transfer). Map output goes to **local disk**; reducers have **no data locality**.`],
+4:[`InputFormat = how to read and split; InputSplit = what portion; RecordReader = actually reads into (key, value).`,`**TextInputFormat** (default): key = byte offset (LongWritable), value = line (Text). **KeyValueTextInputFormat**: key = text before the first tab. **NLineInputFormat**: fixed N lines per mapper (N = 1 default). **SequenceFileInputFormat**: binary, user-defined key/value.`,`Splits are logical and honor record boundaries; blocks are physical storage units. A line crossing two blocks belongs to the first split; LineRecordReader fetches the extra bytes.`,`Small-file problem: every file/block costs ~150 bytes of NameNode RAM and its own mapper. **SequenceFile** packs small files (filename = key, content = value) and is splittable, compressible and typed.`,`Word count: Mapper<Object, Text, Text, IntWritable>, Reducer<Text, IntWritable, Text, IntWritable>. Reduce input types must match map output types. Use setMapOutputKeyClass/ValueClass only when map output types differ from reduce output types.`,`Serialization turns objects into byte streams for RPC and storage. Hadoop uses lightweight **Writable** types because Java Serializable is too heavy.`,`Hadoop is good for massive parallel data, varied data and commodity hardware; not good for transactions, non-parallel work, low latency, many small files, or heavy computation on little data.`],
+5:[`**Side data** is extra read-only data a job needs to process the main dataset.`,`**Job configuration**: for small metadata only (a few KB), stored as Strings (use DefaultStringifier for objects), read in setup().`,`**Distributed cache**: preferred for datasets and lookup files; files are copied to each node once per job (localized), default 10 GB set in mapred-site.xml; a file can be deleted when its reference count reaches zero.`,`**Map-side join** happens in the mapper and needs inputs partitioned and sorted by key (more efficient). **Reduce-side join** is more general and easier but less efficient, because both datasets go through the shuffle.`,`In a reduce-side join the mapper **tags** each record with its source and uses the **join key** as the output key; the reducer combines the tagged values. MultipleInputs assigns one mapper per dataset.`]
+};
 </script>
 <script>
 (function(){
-const Q=window.QUESTIONS, SETS=window.SETS, T=window.TOPICS;
-const KEY='is365-drill-v1';
-let S={ans:{},flags:{},rev:{},set:1,mode:'exam',rf:'flag'};
+const Q=window.QUESTIONS, SETS=window.SETS, T=window.TOPICS, LEC=window.LECTURES, H=window.HINTS;
+const KEY='is365-drill-v1', QUIZ_MIN=30;
+let S={ans:{},flags:{},rev:{},set:1,qset:8,mode:'exam',rf:'flag',qstart:{}};
 try{const raw=localStorage.getItem(KEY);if(raw)Object.assign(S,JSON.parse(raw));}catch(e){}
+if(!S.qstart)S.qstart={};
+if(!SETS.some(s=>s.n===S.qset&&s.quiz))S.qset=8;
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const fmt=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/~(.+?)~/g,'<code>$1</code>');
 const L='abcd';
+const LEC_OF={bigdata:1,engines:2,patterns:2,rdbms:2,grid:2,yarn:2,hadoop:3,mr:3,splits:3,input:4,seq:4,code:4,side:5,join:5};
 
-// deterministic option order (skip when position matters)
 function rng(seed){return function(){seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff;}}
 Q.forEach((q,i)=>{
   q.id=i;
@@ -1338,17 +1559,19 @@ Q.forEach((q,i)=>{
   const fixed=q.fix||q.o.some(o=>/above|^both|^neither/i.test(o));
   const ord=q.o.map((_,k)=>k);
   if(!fixed){const r=rng(i*7919+31);for(let k=ord.length-1;k>0;k--){const j=Math.floor(r()*(k+1));[ord[k],ord[j]]=[ord[j],ord[k]];}}
-  q.order=ord; // display position -> original index
+  q.order=ord;
 });
+const setOf=n=>SETS.find(s=>s.n===n);
+const isQuiz=n=>!!(setOf(n)&&setOf(n).quiz);
+const setName=n=>isQuiz(n)?`Quiz ${n-7}`:`Set ${n}`;
 const bySet=n=>Q.filter(q=>q.s===n);
 const numIn=q=>bySet(q.s).indexOf(q)+1;
-const isRight=q=>S.ans[q.id]!==undefined&&S.ans[q.id]===q.a;
 const isWrong=q=>S.rev[q.s]&&S.ans[q.id]!==undefined&&S.ans[q.id]!==q.a;
-const shown=q=>S.mode==='show'||!!S.rev[q.s];
-
+const shown=q=>S.mode==='show'||!!S.rev[q.s]||(S.mode==='practice'&&S.ans[q.id]!==undefined);
 function setStats(n){const qs=bySet(n);let a=0,r=0;qs.forEach(q=>{if(S.ans[q.id]!==undefined){a++;if(q.a===S.ans[q.id])r++;}});return{tot:qs.length,a,r,rev:!!S.rev[n]};}
-
 function letterOf(q,orig){return q.t==='tf'?q.o[orig]:L[q.order.indexOf(orig)];}
+const tabName=()=>{const h=(location.hash||'#quiz').slice(1);return['quiz','exam','lectures','summary','review'].includes(h)?h:'quiz';};
+const curSet=()=>tabName()==='quiz'?S.qset:S.set;
 
 function optsHTML(q,ctx){
   const show=ctx==='review'||shown(q), pick=S.ans[q.id];
@@ -1362,22 +1585,20 @@ function optsHTML(q,ctx){
     return `<button type="button" class="${cls}" data-q="${q.id}" data-o="${orig}" ${show?'disabled':''}>${lab}<span>${fmt(q.o[orig])}</span>${tag?`<span class="tag">${tag}</span>`:''}</button>`;
   }).join('')+`</div>`;
 }
-
 function deepHTML(q){
   const t=T[q.tp];if(!t)return'';
   return `<div class="deep sec"><h4>شرح زيادة للموضوع: ${esc(t.title)}</h4><p>${fmt(t.lesson)}</p><ul>${t.points.slice(0,6).map(p=>`<li><b dir="ltr">${fmt(p[0])}</b>: ${fmt(p[1])}</li>`).join('')}</ul></div>`;
 }
-
 function revealHTML(q,ctx){
   const pick=S.ans[q.id];
   let v='';
-  if(pick===undefined)v=`<div class="verdict none">ماجاوبتش على السؤال ده.</div>`;
+  if(pick===undefined)v=(ctx==='exam'&&S.mode==='show'&&!S.rev[q.s])?'':`<div class="verdict none">ماجاوبتش على السؤال ده.</div>`;
   else if(pick===q.a)v=`<div class="verdict ok">إجابتك صح.</div>`;
   else v=`<div class="verdict bad">إجابتك (${esc(letterOf(q,pick))}) غلط.</div>`;
   const ansTxt=q.t==='tf'?q.o[q.a]:`${letterOf(q,q.a)}. ${q.o[q.a]}`;
   const whys=q.order.map(orig=>{const ok=orig===q.a;const lab=q.t==='tf'?q.o[orig]:letterOf(q,orig);
     return `<li><span class="mk ${ok?'y':'n'}">${esc(lab)} ${ok?'✓':'✗'}</span><span>${fmt(q.w[orig])}</span></li>`;}).join('');
-  return `<div class="reveal">${ctx==='exam'&&S.mode==='show'&&!S.rev[q.s]&&pick===undefined?'':v}
+  return `<div class="reveal">${v}
     <div class="sec"><h4>الشرح</h4><p>${fmt(q.ex)}</p></div>
     <div class="sec"><h4>الإجابة</h4><p class="answer"><span class="en">${fmt(ansTxt)}</span></p></div>
     <div class="sec"><h4>ليه كل اختيار صح أو غلط</h4><ul class="whys">${whys}</ul></div>
@@ -1385,10 +1606,9 @@ function revealHTML(q,ctx){
     ${(S.flags[q.id]||ctx==='review')?deepHTML(q):''}
     <div class="src">${esc(q.src)}</div></div>`;
 }
-
 function cardHTML(q,ctx){
   const fl=!!S.flags[q.id];
-  const head=ctx==='review'?`Set ${q.s} · Q${numIn(q)}`:`Q${numIn(q)}`;
+  const head=ctx==='review'?`${setName(q.s)} · Q${numIn(q)}`:`Q${numIn(q)}`;
   return `<article class="q${fl?' flagged':''}" id="q-${q.id}">
     <div class="qhead"><span class="qnum">${head}</span><span class="chip${q.t==='tf'?' tf':''}">${q.t==='tf'?'True / False':'MCQ'}</span><span class="chip">${esc(T[q.tp]?T[q.tp].title:q.tp)}</span>
     <button type="button" class="flagbtn" data-flag="${q.id}" aria-pressed="${fl}"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 1.5a.75.75 0 0 1 .75.75V3h8.6a.6.6 0 0 1 .47.97L11 6.5l1.82 2.53a.6.6 0 0 1-.47.97h-8.6v4.25a.75.75 0 0 1-1.5 0V2.25A.75.75 0 0 1 3 1.5Z"/></svg>${fl?'متعلّم عليها':'علّم عليها'}</button></div>
@@ -1398,96 +1618,142 @@ function cardHTML(q,ctx){
   </article>`;
 }
 
-/* ---------- exam view ---------- */
-function renderStrip(){
-  document.getElementById('strip').innerHTML=SETS.map(st=>{const s=setStats(st.n);
-    let bar;
-    if(s.rev){const g=s.r/s.tot*100,r=(s.a-s.r)/s.tot*100;bar=`<i class="g" style="width:${g}%"></i><i class="r" style="width:${r}%"></i>`;}
-    else bar=`<i class="p" style="width:${s.a/s.tot*100}%"></i>`;
-    const meta=s.rev?`${s.r}/${s.tot} ✓`:`${s.a}/${s.tot}`;
-    return `<button type="button" class="blk${st.n>=8?' past':''}" data-set="${st.n}" aria-pressed="${S.set===st.n}"><span class="n">Set ${st.n}</span><span class="meta">${meta}</span><span class="bar">${bar}</span></button>`;}).join('');
-}
-function renderExam(){
-  renderStrip();
-  const st=SETS[S.set-1], s=setStats(S.set), qs=bySet(S.set);
-  document.getElementById('setTitle').textContent=`Set ${st.n} — ${st.title}`;
+/* ---------- practice (bank + quizzes) ---------- */
+function remaining(n){const st=S.qstart[n];if(!st)return null;return Math.max(0,QUIZ_MIN*60000-(Date.now()-st));}
+const mmss=ms=>{const s=Math.ceil(ms/1000);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');};
+function renderPractice(){
+  const quiz=tabName()==='quiz', n=curSet(), st=setOf(n), s=setStats(n), qs=bySet(n);
+  const group=SETS.filter(x=>!!x.quiz===quiz);
+  document.getElementById('stripLabel').textContent=quiz?'3 quizzes · 25 MCQ each · like the real midterm paper':'Question bank · 7 sets · 100 questions (MCQ + True/False)';
+  const strip=document.getElementById('strip');strip.className='strip'+(quiz?' q3':'');
+  strip.innerHTML=group.map(x=>{const t=setStats(x.n);
+    const bar=t.rev?`<i class="g" style="width:${t.r/t.tot*100}%"></i><i class="r" style="width:${(t.a-t.r)/t.tot*100}%"></i>`:`<i class="p" style="width:${t.a/t.tot*100}%"></i>`;
+    const meta=t.rev?`${t.r}/${t.tot} ✓`:`${t.a}/${t.tot}`;
+    const label=quiz?`${setName(x.n)}${x.n===8?' · 2024':''}`:setName(x.n);
+    return `<button type="button" class="blk" data-set="${x.n}" aria-pressed="${n===x.n}"><span class="n">${label}</span><span class="meta">${meta}</span><span class="bar">${bar}</span></button>`;}).join('');
+  const rem=remaining(n);
+  document.getElementById('paper').innerHTML=quiz?`<div class="paper"><div class="uni">Helwan University<br>Faculty of Computers &amp; Artificial Intelligence</div>
+    <div class="grid"><span><b>Department:</b> Information Systems</span><span><b>Course Code:</b> IS 365</span><span><b>Course Name:</b> Big Data Technologies</span><span><b>Total Marks:</b> 25</span><span><b>Time Allowed:</b> 30 Min.</span><span><b>Model:</b> ${n===8?'Midterm Fall 2024 (original)':'Practice model '+(n===9?'B':'C')}</span></div>
+    <div class="qline"><span>Question (1): choose the correct answer</span><span>(25 marks)</span></div></div>`:'';
+  document.getElementById('setTitle').textContent=`${setName(n)} — ${quiz?st.title.replace(/^Quiz \d+ — /,''):st.title}`;
   document.getElementById('setSub').textContent=`${st.ar} · ${qs.length} سؤال`;
-  document.getElementById('mExam').setAttribute('aria-pressed',S.mode==='exam');
-  document.getElementById('mShow').setAttribute('aria-pressed',S.mode==='show');
+  ['Exam','Practice','Show'].forEach(m=>document.getElementById('m'+m).setAttribute('aria-pressed',S.mode===m.toLowerCase()));
+  document.getElementById('modeHelp').textContent={exam:'وضع الامتحان: الإجابات مستخبية. جاوب كله وبعدين سلّم وصحّح.',practice:'وضع التدريب: أول ما تختار إجابة، الصح والشرح بتوع السؤال ده يظهروا على طول.',show:'الإجابات ظاهرة: كل الإجابات والشرح ظاهرين للمذاكرة، وإجاباتك اللي اخترتها متعلّمة جنب الصح.'}[S.mode];
   const sb=document.getElementById('scorebar');
-  if(s.rev)sb.innerHTML=`<span class="big"><span class="ok">${s.r}</span> / ${s.tot}</span><span>صح: <b class="ok">${s.r}</b> · غلط: <b class="bad">${s.a-s.r}</b> · ماتجاوبش: <b>${s.tot-s.a}</b></span><span class="sp"></span><button type="button" class="btn" data-act="retry">امتحن الـ Set ده تاني</button>`;
-  else sb.innerHTML=`<span class="big">${S.mode==='show'?`<span class="ok">${s.r}</span> / ${s.a}`:`${s.a} / ${s.tot}`}</span><span>${S.mode==='show'?`الإجابات ظاهرة: صح ${s.r} من ${s.a} جاوبتهم. ارجع لوضع الامتحان عشان تكمّل، أو سلّم عشان تاخد السكور.`:'وضع الامتحان: اختار إجاباتك، وبعدين سلّم أو دوس "الإجابات ظاهرة" عشان تشوف اللي اخترته جنب الصح.'}</span><span class="sp"></span><button type="button" class="btn primary" data-act="submit" ${s.a===0?'disabled':''}>سلّم وصحّح</button>`;
+  const timerHTML=quiz&&!s.rev?(rem===null?`<button type="button" class="btn" data-act="timer">ابدأ الوقت (${QUIZ_MIN} دقيقة)</button>`:`<span class="timer${rem<300000?' low':''}" id="timer">${mmss(rem)}</span>`):'';
+  if(s.rev)sb.innerHTML=`<span class="big"><span class="ok">${s.r}</span> / ${s.tot}</span><span>صح: <b class="ok">${s.r}</b> · غلط: <b class="bad">${s.a-s.r}</b> · ماتجاوبش: <b>${s.tot-s.a}</b></span><span class="sp"></span><button type="button" class="btn" data-act="retry">حل ${setName(n)} تاني</button>`;
+  else{
+    const lead=S.mode==='exam'?`${s.a} / ${s.tot}`:`<span class="ok">${s.r}</span> / ${s.a}`;
+    const txt=S.mode==='exam'?`جاوبت ${s.a} من ${s.tot}`:`صح ${s.r} من ${s.a} جاوبتهم`;
+    sb.innerHTML=`<span class="big">${lead}</span><span>${txt}</span>${timerHTML}<span class="sp"></span><button type="button" class="btn primary" data-act="submit" ${s.a===0?'disabled':''}>سلّم وصحّح</button>`;
+  }
   document.getElementById('qlist').innerHTML=qs.map(q=>cardHTML(q,'exam')).join('');
-  const nxt=S.set<SETS.length?`<button type="button" class="btn" data-act="next">الـ Set اللي بعده</button>`:'';
+  const nextN=group.findIndex(x=>x.n===n)<group.length-1?group[group.findIndex(x=>x.n===n)+1].n:null;
+  const nxt=nextN?`<button type="button" class="btn" data-act="next" data-n="${nextN}">${setName(nextN)} اللي بعده</button>`:'';
   document.getElementById('endbar').innerHTML=s.rev?nxt:`<button type="button" class="btn primary" data-act="submit" ${s.a===0?'disabled':''}>سلّم وصحّح (${s.a}/${s.tot})</button>${nxt}`;
-  document.getElementById('result').innerHTML=s.rev?`<div class="result"><div class="big">${Math.round(s.r/s.tot*100)}%</div><div>${s.r} من ${s.tot} صح في Set ${S.set}. ${s.r<s.tot?'راجع الأسئلة الحمرا، وعلّم على اللي مش فاهمها عشان تلاقيها في المراجعة.':'ممتاز، كله صح.'}</div></div>`:'';
+  document.getElementById('result').innerHTML=s.rev?`<div class="result"><div class="big">${s.r} / ${s.tot}</div><div>${Math.round(s.r/s.tot*100)}% في ${setName(n)}. ${s.r<s.tot?'راجع الأسئلة الحمرا، وعلّم على اللي مش فاهمها عشان تلاقيها في المراجعة.':'ممتاز، كله صح.'}</div></div>`:'';
 }
 
-/* ---------- review view ---------- */
+/* ---------- review ---------- */
 function renderReview(){
   document.querySelectorAll('#filters button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.f===S.rf));
   const list=Q.filter(q=>S.rf==='flag'?S.flags[q.id]:S.rf==='wrong'?isWrong(q):(S.flags[q.id]||isWrong(q)));
-  const msg={flag:'لسه ماعلّمتش على أي سؤال. دوس "علّم عليها" على أي سؤال مش فاهمه وهيظهر هنا بالشرح الكامل.',wrong:'مفيش أسئلة غلط لسه. الأسئلة بتظهر هنا بعد ما تسلّم أي Set.',both:'مفيش حاجة هنا لسه.'};
+  const msg={flag:'لسه ماعلّمتش على أي سؤال. دوس "علّم عليها" على أي سؤال مش فاهمه وهيظهر هنا بالشرح الكامل.',wrong:'مفيش أسئلة غلط لسه. الأسئلة بتظهر هنا بعد ما تسلّم أي Set أو Quiz.',both:'مفيش حاجة هنا لسه.'};
   document.getElementById('rlist').innerHTML=list.length?list.map(q=>cardHTML(q,'review')).join(''):`<div class="empty">${msg[S.rf]}</div>`;
 }
 
-/* ---------- summary view ---------- */
+/* ---------- lectures ---------- */
+const tableHTML=t=>`<div class="tbl"><table>${t.h?`<thead><tr>${t.h.map(x=>`<th>${fmt(x)}</th>`).join('')}</tr></thead>`:''}<tbody>${t.r.map(r=>`<tr>${r.map((c,i)=>`<td${i===0?' style="font-weight:600"':''}>${fmt(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+function renderLectures(){
+  let h=`<div class="sethead"><div><h2 style="direction:rtl">شرح المحاضرات</h2><p>كل محاضرة من 1 لـ 5 بالترتيب، بالعربي والمصطلحات بالإنجليزي. بعد ما تخلص محاضرة حل أسئلتها من بنك الأسئلة.</p></div></div>`;
+  h+=`<nav class="toc" aria-label="Lectures">${LEC.map(l=>`<a href="#lectures" data-jump="lec-${l.n}">Lecture ${l.n}</a>`).join('')}</nav>`;
+  h+=LEC.map(l=>`<section class="topic" id="lec-${l.n}"><h3 class="en">${esc(l.title)}</h3><p class="lesson">${fmt(l.intro)}</p>
+    ${l.secs.map(sc=>`<div class="lsec"><h4>${fmt(sc[0])}</h4>${sc[1].map(p=>`<p>${fmt(p)}</p>`).join('')}${sc[2]?tableHTML(sc[2]):''}</div>`).join('')}
+    ${(window.LECTURES_EN||{})[l.n]?`<div class="lsec en-sum" dir="ltr" lang="en"><h4>Lecture ${l.n} in English</h4><ul>${window.LECTURES_EN[l.n].map(p=>`<li>${fmt(p)}</li>`).join('')}</ul></div>`:''}</section>`).join('');
+  document.getElementById('lectures').innerHTML=h;
+}
+
+/* ---------- summary & hints ---------- */
 function renderSummary(){
   const C=window.CORRECTIONS, G=window.GLOSSARY;
-  const topics=Object.entries(T);
-  let h=`<div class="sethead"><div><h2 style="direction:rtl">الملخص والهنتات</h2><p>كل موضوع: شرح قصير، النقط المهمة مشروحة، وبعدين جدول "لو شفت الكلمة دي في السؤال → اختار ده".</p></div></div>`;
-  h+=`<nav class="toc" aria-label="Topics">${topics.map(([k,t])=>`<a href="#summary" data-jump="t-${k}">${esc(t.title)}</a>`).join('')}<a href="#summary" data-jump="t-gloss">Glossary</a><a href="#summary" data-jump="t-fix">تصحيح الامتحانات</a></nav>`;
-  h+=topics.map(([k,t])=>`<section class="topic" id="t-${k}"><h3>${esc(t.title)}</h3><p class="lesson">${fmt(t.lesson)}</p>
-    <h4>أهم النقط</h4><ul class="points">${t.points.map(p=>`<li><span class="term">${fmt(p[0])}</span><span>${fmt(p[1])}</span></li>`).join('')}</ul>
-    <div class="hints"><h4>هنتات الموضوع ده: لو شفت ... اختار</h4><div class="tbl"><table><thead><tr><th>الكلمة في السؤال</th><th></th><th>اختار</th></tr></thead><tbody>${t.hints.map(x=>`<tr><td class="en">${fmt(x[0])}</td><td class="arrow">←</td><td class="ans">${fmt(x[1])}</td></tr>`).join('')}</tbody></table></div></div></section>`).join('');
-  h+=`<section class="topic" id="t-gloss"><h3>Glossary</h3><p class="lesson">أهم المصطلحات في سطر واحد لكل مصطلح.</p><div class="tbl"><table><tbody>${G.map(g=>`<tr><td class="en"><b>${esc(g[0])}</b></td><td class="en">${esc(g[1])}</td></tr>`).join('')}</tbody></table></div></section>`;
+  let h=`<div class="sethead"><div><h2 style="direction:rtl">أهم النقط والهنتات</h2><p>مترتبة: الأرقام، الفخاخ، المقارنات، وبعدين كل محاضرة بنقطها وهنتاتها، وفي الآخر هنتات كل الأسئلة ودي اخترناها ليه.</p></div></div>`;
+  h+=`<nav class="toc" aria-label="Sections"><a href="#summary" data-jump="s-num">الأرقام</a><a href="#summary" data-jump="s-trap">الفخاخ</a><a href="#summary" data-jump="s-cmp">المقارنات</a>${LEC.map(l=>`<a href="#summary" data-jump="s-l${l.n}">نقط Lecture ${l.n}</a>`).join('')}<a href="#summary" data-jump="s-qh">هنتات الأسئلة</a><a href="#summary" data-jump="s-gloss">المصطلحات</a><a href="#summary" data-jump="s-fix">تصحيح الامتحانات</a></nav>`;
+  // 1 numbers
+  h+=`<h2 class="sum" id="s-num">1. الأرقام اللي لازم تحفظها</h2><section class="topic"><div class="tbl"><table><tbody>${H.numbers.map(r=>`<tr><td class="ans">${esc(r[0])}</td><td>${fmt(r[1])}</td></tr>`).join('')}</tbody></table></div></section>`;
+  // 2 traps
+  h+=`<h2 class="sum" id="s-trap">2. الفخاخ المشهورة</h2><section class="topic"><p class="lesson">الحاجات اللي الامتحان بيبدّلها عشان يوقعك. لو شفت واحدة منهم ركّز في الكلمة.</p><ul class="traps">${H.traps.map(t=>`<li><b>${esc(t[0])}</b><span>${fmt(t[1])}</span></li>`).join('')}</ul></section>`;
+  // 3 comparisons
+  const lecTables=[];LEC.forEach(l=>l.secs.forEach(sc=>{if(sc[2]&&sc[2].h&&/vs|Split|join|InputFormat|مميزات|Good/i.test(sc[0]+sc[2].h.join('')))lecTables.push({t:sc[0],h:sc[2].h,r:sc[2].r});}));
+  h+=`<h2 class="sum" id="s-cmp">3. جداول المقارنة</h2>${lecTables.concat(H.compare).map(c=>`<section class="topic"><h3 class="en">${fmt(c.t)}</h3>${tableHTML(c)}</section>`).join('')}`;
+  // 4 per lecture topic points + keyword hints
+  h+=LEC.map(l=>`<h2 class="sum" id="s-l${l.n}">4.${l.n} أهم نقط Lecture ${l.n}</h2>`+l.topics.map(k=>{const t=T[k];if(!t)return'';return `<section class="topic"><h3 class="en">${esc(t.title)}</h3><p class="lesson">${fmt(t.lesson)}</p>
+    <h4>أهم النقط مشروحة</h4><ul class="points">${t.points.map(p=>`<li><span class="term">${fmt(p[0])}</span><span>${fmt(p[1])}</span></li>`).join('')}</ul>
+    <h4>لو شفت الكلمة دي في السؤال ← اختار</h4><div class="tbl"><table><thead><tr><th class="en">الكلمة في السؤال</th><th></th><th class="en">اختار</th></tr></thead><tbody>${t.hints.map(x=>`<tr><td class="en">${fmt(x[0])}</td><td class="arrow">←</td><td class="ans">${fmt(x[1])}</td></tr>`).join('')}</tbody></table></div></section>`;}).join('')).join('');
+  // 5 all question hints with "why"
+  const seen=new Set();
+  const uniq=Q.filter(q=>{const k=q.q.trim().toLowerCase();if(seen.has(k))return false;seen.add(k);return true;});
+  h+=`<h2 class="sum" id="s-qh">5. هنتات كل الأسئلة: اخترنا الإجابة دي ليه</h2><section class="topic"><p class="lesson">كل سؤال في البنك والكويزات (من غير تكرار)، مترتبين بالمحاضرة والموضوع: الإجابة، ليه اخترناها، والهنت اللي تفتكره بيه. دوس على أي موضوع يفتح.</p>`;
+  LEC.forEach(l=>{l.topics.forEach(k=>{const qs=uniq.filter(q=>q.tp===k);if(!qs.length)return;
+    h+=`<details class="qh"><summary>Lecture ${l.n} · ${esc(T[k].title)} (${qs.length})</summary><div class="tbl"><table><thead><tr><th class="en">Question</th><th class="en">Answer</th><th>اخترناها ليه</th><th>الهنت</th></tr></thead><tbody>${qs.map(q=>{
+      let why=String(q.w[q.a]).replace(/^صح( حسب السلايد)?\s*[—-]?\s*/,'').replace(/^\.\s*/,'').trim();
+      if(why.length<25){const ex=String(q.ex).replace(/\n/g,' ');const cut=ex.search(/\.\s/);why=(why?why+' ':'')+(cut>0&&cut<260?ex.slice(0,cut+1):ex.slice(0,240)+'…');}
+      return `<tr><td class="en">${fmt(q.q.length>140?q.q.slice(0,137)+'…':q.q)}</td><td class="ans">${fmt(q.o[q.a])}</td><td class="why">${fmt(why)}</td><td class="hint">${fmt(q.tip)}</td></tr>`;}).join('')}</tbody></table></div></details>`;});});
+  h+=`</section>`;
+  // 6 glossary
+  h+=`<h2 class="sum" id="s-gloss">6. أهم المصطلحات</h2><section class="topic"><div class="tbl"><table><tbody>${G.map(g=>`<tr><td class="en"><b>${esc(g[0])}</b></td><td class="en">${esc(g[1])}</td></tr>`).join('')}</tbody></table></div></section>`;
+  // 7 corrections
   const E=C.exam2024||[];
-  h+=`<section class="topic" id="t-fix"><h3 style="direction:rtl">تصحيح إجابات الامتحانات من السلايدز</h3>
-   <h4>امتحان الميد Fall 2024 (12-11-2024): الإجابات المتعلّمة في الورقة</h4><p class="note">${E.filter(e=>e[2]).length} من ${E.length} صح حسب السلايدز. سؤال 15 بس مختلف. الـ 25 سؤال موجودين في Set 8 و Set 9 بالشرح.</p><div class="tbl"><table><thead><tr><th>#</th><th>المتعلّم في الورقة</th><th></th></tr></thead><tbody>${E.map(e=>`<tr><td class="en">${e[0]}</td><td class="en">${esc(e[1])}</td><td><span class="pill ${e[2]?'ok':'bad'}">${e[2]?'صح':'غلط'}</span></td></tr>`).join('')}</tbody></table></div>
-   <h4 style="margin-top:14px">سؤال 14 و 15 بالتفصيل</h4><div class="tbl"><table><thead><tr><th>السؤال</th><th>المتعلّم</th><th>الصح حسب السلايد</th></tr></thead><tbody>${C.exam.map(e=>`<tr><td class="en">${esc(e.q)}</td><td class="en">${esc(e.marked)} <span class="pill ${e.ok?'ok':'bad'}">${e.ok?'صح':'غلط'}</span></td><td><b class="en" dir="ltr">${esc(e.correct)}</b><br><span class="note">${esc(e.why)}</span></td></tr>`).join('')}</tbody></table></div>
-   <h4 style="margin-top:14px">أسئلة True / False من ملف أسئلة الكتاب (موجودة في الـ 100 سؤال)</h4><div class="tbl"><table><tbody>${C.bookTF.map(r=>`<tr><td class="en">${esc(r[0])}</td><td><span class="pill ${r[1]==='True'?'ok':'bad'}">${r[1]}</span></td><td class="note">${esc(r[2])}</td></tr>`).join('')}</tbody></table></div>
-   <h4 style="margin-top:14px">أسئلة Hive و Spark من ملف الكتاب</h4><p class="note">دي مش موجودة في سلايدات الميد (Lectures 1–5)، فما دخلتهاش في الـ 100 سؤال. الإجابات دي من معرفة عامة بـ Hive و Spark مش من السلايدز، عشان لو اتسألت.</p><div class="tbl"><table><tbody>${C.bookOther.map(r=>`<tr><td class="en">${esc(r[0])}</td><td class="ans">${esc(r[1])}</td></tr>`).join('')}</tbody></table></div></section>`;
+  h+=`<h2 class="sum" id="s-fix">7. تصحيح إجابات الامتحانات من السلايدز</h2><section class="topic">
+   <h4>امتحان الميد Fall 2024 (12-11-2024)</h4><p class="note">${E.filter(e=>e[2]).length} من ${E.length} من الإجابات المتعلّمة في الورقة صح حسب السلايدز. سؤال 15 بس مختلف. الامتحان كامل في Quiz 1.</p><div class="tbl"><table><thead><tr><th>#</th><th class="en">المتعلّم في الورقة</th><th></th></tr></thead><tbody>${E.map(e=>`<tr><td class="en">${e[0]}</td><td class="en">${esc(e[1])}</td><td><span class="pill ${e[2]?'ok':'bad'}">${e[2]?'صح':'غلط'}</span></td></tr>`).join('')}</tbody></table></div>
+   <h4 style="margin-top:14px">أسئلة True / False من ملف أسئلة الكتاب</h4><div class="tbl"><table><tbody>${C.bookTF.map(r=>`<tr><td class="en">${esc(r[0])}</td><td><span class="pill ${r[1]==='True'?'ok':'bad'}">${r[1]}</span></td><td class="note">${esc(r[2])}</td></tr>`).join('')}</tbody></table></div>
+   <h4 style="margin-top:14px">أسئلة Hive و Spark من ملف الكتاب</h4><p class="note">مش موجودة في سلايدات الميد (Lectures 1–5). الإجابات دي من معرفة عامة بـ Hive و Spark مش من السلايدز.</p><div class="tbl"><table><tbody>${C.bookOther.map(r=>`<tr><td class="en">${esc(r[0])}</td><td class="ans">${esc(r[1])}</td></tr>`).join('')}</tbody></table></div></section>`;
   document.getElementById('summary').innerHTML=h;
 }
 
 /* ---------- shell ---------- */
 function renderTop(){
-  let r=0,a=0,rev=0;SETS.forEach(st=>{const s=setStats(st.n);if(s.rev){rev+=s.tot;r+=s.r;}a+=s.a;});
+  let r=0,rev=0,a=0;SETS.forEach(st=>{const s=setStats(st.n);if(s.rev){rev+=s.tot;r+=s.r;}a+=s.a;});
   document.getElementById('overall').innerHTML=rev?`السكور الكلي: <strong>${r}</strong> / ${rev}`:`جاوبت <strong>${a}</strong> / ${Q.length}`;
   document.getElementById('flagCount').textContent=Object.keys(S.flags).filter(k=>S.flags[k]).length;
 }
-function tab(){const h=(location.hash||'#exam').slice(1);return['exam','review','summary'].includes(h)?h:'exam';}
-let summaryDone=false;
+const done={lectures:false,summary:false};
 function render(){
-  const t=tab();
+  const t=tabName(), v=(t==='quiz'||t==='exam')?'exam':t;
   document.querySelectorAll('nav.tabs a').forEach(a=>a.setAttribute('aria-current',a.dataset.tab===t?'page':'false'));
-  ['exam','review','summary'].forEach(v=>document.getElementById('v-'+v).hidden=v!==t);
-  if(t==='exam')renderExam();else if(t==='review')renderReview();else if(!summaryDone){renderSummary();summaryDone=true;}
+  ['exam','lectures','summary','review'].forEach(x=>document.getElementById('v-'+x).hidden=x!==v);
+  if(v==='exam')renderPractice();else if(v==='review')renderReview();
+  else if(!done[v]){(v==='lectures'?renderLectures:renderSummary)();done[v]=true;}
   renderTop();
 }
 function keepPos(id,fn){const el=document.getElementById('q-'+id);const top=el?el.getBoundingClientRect().top:null;fn();const el2=document.getElementById('q-'+id);if(el2&&top!==null)window.scrollBy(0,el2.getBoundingClientRect().top-top);}
+function setCur(n){if(tabName()==='quiz')S.qset=n;else S.set=n;}
 
 document.addEventListener('click',e=>{
   const o=e.target.closest('.opt');
-  if(o&&!o.disabled){const id=+o.dataset.q,v=+o.dataset.o;S.ans[id]=S.ans[id]===v?undefined:v;if(S.ans[id]===undefined)delete S.ans[id];save();keepPos(id,render);return;}
+  if(o&&!o.disabled){const id=+o.dataset.q,v=+o.dataset.o;if(S.ans[id]===v)delete S.ans[id];else S.ans[id]=v;save();keepPos(id,render);return;}
   const f=e.target.closest('[data-flag]');
   if(f){const id=+f.dataset.flag;if(S.flags[id])delete S.flags[id];else S.flags[id]=true;save();keepPos(id,render);return;}
   const b=e.target.closest('.blk');
-  if(b){S.set=+b.dataset.set;save();render();document.getElementById('setTitle').scrollIntoView({block:'start'});window.scrollBy(0,-80);return;}
+  if(b){setCur(+b.dataset.set);save();render();document.getElementById('setTitle').scrollIntoView({block:'start'});window.scrollBy(0,-80);return;}
   const act=e.target.closest('[data-act]');
-  if(act){const a=act.dataset.act;
-    if(a==='submit'){S.rev[S.set]=true;save();render();document.getElementById('scorebar').scrollIntoView({block:'center'});}
-    else if(a==='retry'){bySet(S.set).forEach(q=>delete S.ans[q.id]);delete S.rev[S.set];S.mode='exam';save();render();window.scrollTo(0,0);}
-    else if(a==='next'){S.set=Math.min(SETS.length,S.set+1);save();render();window.scrollTo(0,0);}
+  if(act){const a=act.dataset.act,n=curSet();
+    if(a==='submit'){S.rev[n]=true;save();render();document.getElementById('scorebar').scrollIntoView({block:'center'});}
+    else if(a==='retry'){bySet(n).forEach(q=>delete S.ans[q.id]);delete S.rev[n];delete S.qstart[n];S.mode='exam';save();render();window.scrollTo(0,0);}
+    else if(a==='next'){setCur(+act.dataset.n);save();render();window.scrollTo(0,0);}
+    else if(a==='timer'){S.qstart[n]=Date.now();S.mode='exam';save();render();}
     return;}
   const fb=e.target.closest('#filters button');
   if(fb){S.rf=fb.dataset.f;save();render();return;}
   const j=e.target.closest('[data-jump]');
   if(j){e.preventDefault();const el=document.getElementById(j.dataset.jump);if(el)el.scrollIntoView({block:'start'});return;}
 });
-document.getElementById('mExam').onclick=()=>{S.mode='exam';save();render();};
-document.getElementById('mShow').onclick=()=>{S.mode='show';save();render();};
+['Exam','Practice','Show'].forEach(m=>document.getElementById('m'+m).onclick=()=>{S.mode=m.toLowerCase();save();render();});
 window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0);});
+setInterval(()=>{
+  if(tabName()!=='quiz')return;const n=S.qset;if(S.rev[n])return;const rem=remaining(n);if(rem===null)return;
+  if(rem<=0){S.rev[n]=true;save();render();return;}
+  const el=document.getElementById('timer');if(el){el.textContent=mmss(rem);el.classList.toggle('low',rem<300000);}
+},1000);
 render();
 })();
 </script>

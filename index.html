@@ -171,6 +171,16 @@ h2.sum{font-family:var(--f-head);font-size:22px;margin:28px 0 10px;scroll-margin
 .traps li{display:grid;grid-template-columns:minmax(120px,200px) 1fr;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
 .traps li b{direction:ltr;text-align:right}
 @media (max-width:560px){.traps li{grid-template-columns:1fr;gap:2px}}
+.varbox{border:1.5px dashed var(--line);border-radius:8px;padding:8px 12px}
+.varbox h4{color:var(--ink)}
+.vars{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.vars li{display:flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.vars li:last-child{border-bottom:0;padding-bottom:0}
+.vars .vq{font-size:14px}
+.vars .va{font-weight:700;color:var(--ok);font-size:14px}
+.vars .vn{flex-basis:100%;font-size:12.5px;color:var(--muted)}
+td.vcol{min-width:230px}
+td.vcol .vars .vq,td.vcol .vars .va{font-size:12.5px}
 .en-sum{background:var(--sunken);border-radius:8px;padding:10px 14px;text-align:left}
 .en-sum ul{margin:0;padding-left:18px}
 .en-sum li{margin-bottom:5px}
@@ -1536,6 +1546,183 @@ window.LECTURES_EN = {
 4:[`InputFormat = how to read and split; InputSplit = what portion; RecordReader = actually reads into (key, value).`,`**TextInputFormat** (default): key = byte offset (LongWritable), value = line (Text). **KeyValueTextInputFormat**: key = text before the first tab. **NLineInputFormat**: fixed N lines per mapper (N = 1 default). **SequenceFileInputFormat**: binary, user-defined key/value.`,`Splits are logical and honor record boundaries; blocks are physical storage units. A line crossing two blocks belongs to the first split; LineRecordReader fetches the extra bytes.`,`Small-file problem: every file/block costs ~150 bytes of NameNode RAM and its own mapper. **SequenceFile** packs small files (filename = key, content = value) and is splittable, compressible and typed.`,`Word count: Mapper<Object, Text, Text, IntWritable>, Reducer<Text, IntWritable, Text, IntWritable>. Reduce input types must match map output types. Use setMapOutputKeyClass/ValueClass only when map output types differ from reduce output types.`,`Serialization turns objects into byte streams for RPC and storage. Hadoop uses lightweight **Writable** types because Java Serializable is too heavy.`,`Hadoop is good for massive parallel data, varied data and commodity hardware; not good for transactions, non-parallel work, low latency, many small files, or heavy computation on little data.`],
 5:[`**Side data** is extra read-only data a job needs to process the main dataset.`,`**Job configuration**: for small metadata only (a few KB), stored as Strings (use DefaultStringifier for objects), read in setup().`,`**Distributed cache**: preferred for datasets and lookup files; files are copied to each node once per job (localized), default 10 GB set in mapred-site.xml; a file can be deleted when its reference count reaches zero.`,`**Map-side join** happens in the mapper and needs inputs partitioned and sorted by key (more efficient). **Reduce-side join** is more general and easier but less efficient, because both datasets go through the shuffle.`,`In a reduce-side join the mapper **tags** each record with its source and uses the **join key** as the output key; the reducer combines the tagged values. MultipleInputs assigns one mapper per dataset.`]
 };
+
+// "What if the wording changes": per question index → [[changed question / statement, new answer, Arabic note], ...]
+window.VARIANTS = {
+0:[[`Which of the 3Vs refers to the magnitude of data?`,`Volume`,``],[`Which characteristic is NOT one of the 3Vs: Volume, Variety, Velocity, Value?`,`Value`,`أي V غير الـ 3 دول = برة التعريف`]],
+1:[[`"Volume" refers to:`,`The magnitude (size) of the data`,``],[`"Variety" refers to:`,`Data coming from a variety of sources`,``]],
+2:[[`Traditional methods and databases can NOT handle Big Data.`,`True`,`لو شال كلمة can وحط can not تبقى True`],[`Big Data needs new tools and technologies to store and manage it.`,`True`,``]],
+3:[[`Organizations will need new data architectures and analytic ______.`,`sandboxes`,`نص التعريف: analytic sandboxes`],[`The source of this definition is:`,`McKinsey Global Institute (2011)`,``]],
+4:[[`Which platform is SUITABLE (but not native) for iterative processing?`,`Apache Spark`,`suitable = Spark`],[`Which platform is NOT suitable for iterative processing?`,`MapReduce`,``]],
+5:[[`Which framework provides NEAR real-time processing?`,`Apache Spark`,`لو زوّد كلمة near تبقى Spark`],[`Which framework supports batch processing only?`,`MapReduce`,``]],
+6:[[`Which frameworks SUPPORT interactive analysis?`,`Apache Spark and Apache Flink`,`لو شال NO يبقى الاتنين`],[`MapReduce supports interactive analysis.`,`False`,``]],
+7:[[`Only MapReduce supports batch processing.`,`False`,`الـ 3 بيدعموا batch`],[`Spark and Flink support real-time processing.`,`False`,`Spark near real time بس، Flink هو اللي real time`]],
+8:[[`Which pattern uses Storm, Spark Streaming or Samza?`,`Stream processing`,``],[`Which pattern holds intermediate working sets in memory (e.g., ML)?`,`Iterative processing`,``],[`Which pattern uses Solr?`,`Search`,``]],
+9:[[`Why is MapReduce inefficient for iterative algorithms?`,`It loads data from disk on each iteration; its architecture does not allow holding the working set in memory`,``],[`Spark enables a highly ______ style of working with datasets.`,`exploratory`,``]],
+10:[[`Impala and Hive on Tez are examples of:`,`Interactive SQL`,``],[`Solr and ElasticSearch are examples of:`,`Search / information retrieval`,``],[`MPI and SAN belong to:`,`HPC / Grid computing`,``]],
+11:[[`Using Impala for low-latency SQL is an example of:`,`Interactive SQL`,``],[`ElasticSearch is used for:`,`Information retrieval (search)`,``]],
+12:[[`In stream processing, the input data is unbounded.`,`True`,`لو بدّل bounded بـ unbounded تبقى True`],[`Stream processing can be more efficient than repeated batch jobs because it incrementalizes the computation.`,`True`,``]],
+13:[[`YARN was introduced in Hadoop 1.`,`False — Hadoop 2`,``],[`YARN allows only MapReduce programs to run on Hadoop.`,`False — any distributed program`,``]],
+14:[[`MapReduce is suitable for interactive analysis with results in a few seconds.`,`False`,``],[`MapReduce is best for online use where a human waits for results.`,`False — offline use`,``]],
+15:[[`What data size does a traditional RDBMS typically handle?`,`Gigabytes`,``],[`RDBMS handles Petabytes while MapReduce handles Gigabytes.`,`False — معكوسة`,``]],
+16:[[`How does a traditional RDBMS access data?`,`Interactive and batch`,``],[`MapReduce supports interactive access.`,`False`,``]],
+17:[[`Hadoop is suitable for write once, read many times.`,`True`,`لو كتب write once read many تبقى True`],[`An RDBMS is good for datasets that are continually updated.`,`True`,``]],
+18:[[`Which pair describes the traditional RDBMS?`,`Transactions: ACID — Integrity: High`,``],[`MapReduce supports ACID transactions.`,`False`,``]],
+19:[[`An RDBMS validates the schema before storing data. This is called:`,`Schema-on-write`,``],[`Schema-on-read avoids the costly data loading phase because loading is just a:`,`File copy`,``]],
+20:[[`If you double the input data only (same cluster), the 1-hour job takes:`,`2 hours`,``],[`If you double the cluster only (same data), the job takes about:`,`30 minutes`,`ده استنتاج من الـ linear scaling`]],
+21:[[`If you double the input data AND the cluster size, the job runs twice as slowly.`,`False — same speed`,``],[`MapReduce scales nonlinearly with the size of the data.`,`False — linearly (RDBMS = nonlinear)`,``]],
+22:[[`MapReduce is a good fit for:`,`Analyzing the whole dataset in a batch fashion`,``],[`Write-once, read-many workloads suit:`,`MapReduce`,``]],
+23:[[`A spreadsheet is an example of:`,`Semi-structured data`,``],[`Plain text and images are examples of:`,`Unstructured data`,``],[`Structured data is the realm of:`,`The RDBMS`,``]],
+24:[[`XML documents and database tables with a predefined schema are:`,`Structured data`,``],[`Data with no particular internal structure is:`,`Unstructured data`,``]],
+25:[[`A spreadsheet is:`,`Semi-structured data`,``],[`Database tables with a predefined schema are:`,`Structured data`,``]],
+26:[[`Hadoop works well on structured data only because it uses schema-on-write.`,`False`,``],[`Schema-on-read means data is interpreted at load time.`,`False — at processing time`,``]],
+27:[[`Normalization is used in RDBMS to:`,`Retain integrity and remove redundancy`,``],[`Normalized data helps Hadoop's streaming reads.`,`False`,``]],
+28:[[`Web server logs are highly normalized, which suits Hadoop.`,`False — they are NOT normalized`,``],[`Log files of all kinds are well suited to analysis with Hadoop.`,`True`,``]],
+29:[[`Hadoop can perform joins, but they are not used as much as in the relational world.`,`True`,`لو شال cannot تبقى True`]],
+30:[[`Hadoop uses which mechanism for interprocess communication?`,`RPC`,`MPI = Grid، RPC = Hadoop`],[`Which API is associated with Hadoop's resource management?`,`YARN`,``]],
+31:[[`In Hadoop, data is stored in:`,`HDFS`,``],[`HPC works well for which jobs?`,`Compute-intensive jobs`,``]],
+32:[[`HPC works well for predominantly ______ jobs.`,`compute-intensive`,``],[`At what data size does Hadoop really start to shine?`,`Hundreds of gigabytes`,``]],
+33:[[`Data flow is exposed by low-level programming in Grid computing.`,`True`,`لو بدّل MapReduce بـ Grid تبقى True`],[`Hadoop is all about high-level programming.`,`True`,``]],
+34:[[`Which gives the programmer more control but is harder to write?`,`MPI (Grid)`,``],[`In Hadoop, checkpointing and recovery are handled by:`,`The MapReduce processing engine`,``]],
+35:[[`Storing multiple copies of data for reliability is called:`,`Replication`,``],[`Tasks having no dependence on each other is called:`,`Shared-nothing architecture`,``]],
+36:[[`Hadoop conserves network bandwidth by:`,`Explicitly modeling network topology`,``],[`Conserving bandwidth prevents high-CPU analyses in Hadoop.`,`False — it does not preclude them`,``]],
+37:[[`Which frameworks spare the programmer from thinking about failure?`,`Distributed processing frameworks like MapReduce`,``]],
+38:[[`Because tasks are independent, the order in which tasks run:`,`Doesn't matter`,``],[`MPI programs manage failure by:`,`Explicit checkpointing and recovery`,``]],
+39:[[`Rerunning a failed map task needs more care than rerunning a failed reducer.`,`False`,`معكوسة`],[`To rerun a failed reducer, Hadoop may need to rerun the relevant maps to regenerate map outputs.`,`True`,``]],
+40:[[`An RDBMS provides low-latency retrieval for queries on indexed data.`,`True`,`لو بدّل Hadoop بـ RDBMS تبقى True`],[`Hadoop is not good for low latency data access.`,`True`,``]],
+41:[[`Which of the following is Hadoop GOOD for?`,`Massive amounts of data through parallelism / variety of data / commodity hardware`,``],[`Which is Hadoop NOT good for?`,`Transactions, non-parallel work, low latency, small files, heavy calc on little data`,``]],
+42:[[`All of the following are things Hadoop is GOOD for, EXCEPT:`,`Any "not good" item, e.g. processing transactions (random access)`,`لو اتقلب السؤال اختار من القايمة التانية`]],
+43:[[`Hadoop needs expensive specialized servers to store unstructured data.`,`False`,``]],
+44:[[`Compared to Grid computing, Hadoop resources are:`,`Much cheaper (commodity hardware)`,``]],
+45:[[`Hadoop can only be programmed in Java.`,`False`,``],[`Hadoop was developed in:`,`Java`,``]],
+46:[[`Which component of Hadoop 2 is the distributed file system?`,`HDFS`,``],[`Which component handles parallel processing using the MapReduce model?`,`MapReduce`,``]],
+47:[[`Which component is the high-performance distributed file system?`,`HDFS`,``],[`Which component stores file metadata?`,`NameNode`,``]],
+48:[[`Which feature means data on a failed node is recovered from other nodes automatically?`,`Fault tolerance`,``],[`Which feature means code can be modified per business needs?`,`Open source`,``]],
+49:[[`"Data is accessed from another path if hardware crashes" is:`,`High availability`,``],[`"Failures are recovered automatically by the framework" is:`,`Fault tolerance`,``]],
+50:[[`"Data is stored reliably due to replication" is:`,`Reliability`,``],[`"New nodes added without downtime" is:`,`Scalability`,``]],
+51:[[`Data locality means moving data to the computation.`,`False`,`معكوسة`]],
+52:[[`Open source means Hadoop's code cannot be modified.`,`False`,``]],
+53:[[`Hadoop runs on a cluster of commodity hardware.`,`True`,`لو بدّل specialized بـ commodity تبقى True`],[`Adding nodes in Hadoop requires much pre-planning.`,`False`,``]],
+54:[[`Which feature means the framework takes care of all distributed computing for the client?`,`Easy to use`,``]],
+55:[[`What is the role of the DataNode?`,`Stores the actual data blocks, serves read/write, sends status to the NameNode`,``],[`The NameNode acts as the ______ of HDFS.`,`master`,``]],
+56:[[`The DataNode stores the actual data blocks.`,`True`,`لو بدّل NameNode بـ DataNode تبقى True`],[`The NameNode keeps metadata information only.`,`True`,``]],
+57:[[`Which IS a responsibility of the NameNode?`,`Keeping which DataNode stores each block`,``],[`Which is a responsibility of a DataNode?`,`Storing blocks / serving data / sending status`,``]],
+58:[[`"Hadoop" refers only to HDFS and MapReduce.`,`False — sometimes the larger ecosystem`,``]],
+59:[[`MapReduce is studied because it is the fastest for iterative jobs.`,`False`,``]],
+60:[[`In MapReduce, the types of the key-value pairs are fixed by Hadoop.`,`False — chosen by the programmer`,``],[`The programmer specifies two functions:`,`The map function and the reduce function`,``]],
+61:[[`How many formal type parameters does the Reducer class have?`,`Four`,``],[`In Mapper<A, B, C, D>, which is the output key?`,`C (the third)`,``]],
+62:[[`Which component aggregates all values that share the same key?`,`Reducer`,``],[`The bigger the file and cluster, the ______ mappers get involved.`,`more`,``]],
+63:[[`Which component reads a portion of the input and emits (key, value) pairs?`,`Mapper`,``],[`Reducer output can be used as input to:`,`The next MapReduce job`,``]],
+64:[[`Fewer unique keys give more reducer parallelism.`,`False`,``]],
+65:[[`The combiner runs on the ______ output.`,`map`,``],[`MapReduce applications are limited by the ______ available on the cluster.`,`bandwidth`,``]],
+66:[[`Hadoop divides a job into which two types of tasks?`,`Map tasks and reduce tasks`,``],[`Tasks are scheduled using:`,`YARN`,``]],
+67:[[`A failed task is rerun on the same node.`,`False — a different node`,``]],
+68:[[`One map task runs the map function for each ______ in the split.`,`record`,``],[`A 384 MB file with 128 MB splits creates how many map tasks?`,`3`,``]],
+69:[[`What happens when splits are small (but not too small)?`,`Better load balancing`,``],[`What happens if splits are too large (e.g., the whole file)?`,`Less parallelism, poor load balancing`,``]],
+70:[[`What is the default HDFS block size?`,`128 MB`,``],[`The block size can be changed for the cluster or per file.`,`True`,``]],
+71:[[`What happens if a split spans two blocks?`,`Part of it must be transferred over the network, so it is less efficient`,``]],
+72:[[`The map task runs on the same node as its block:`,`Data-local (a)`,``],[`The map task runs on a node in a different rack:`,`Off-rack (c)`,``]],
+73:[[`Where is reduce output (final output) written?`,`HDFS`,``],[`Map output is final output, so it is written to HDFS.`,`False`,``]],
+74:[[`Reduce tasks don't have the advantage of data locality.`,`True`,`لو حط don't تبقى True`],[`Map tasks benefit from data locality.`,`True`,``]],
+75:[[`Which defines HOW the data is read and split?`,`InputFormat`,``],[`Which defines WHAT portion is processed by one mapper?`,`InputSplit`,``]],
+76:[[`Which InputFormat reads binary key-value pairs?`,`SequenceFileInputFormat`,``],[`What is Hadoop's default OutputFormat?`,`TextOutputFormat`,``]],
+77:[[`In KeyValueTextInputFormat, the key and value are:`,`Key: text up to the first tab — Value: rest of the line`,``],[`In SequenceFileInputFormat, the key and value are:`,`User-defined`,``]],
+78:[[`The key in TextInputFormat is the line number.`,`False — byte offset`,``],[`The key in KeyValueTextInputFormat is the offset.`,`False — text before the first tab`,``]],
+79:[[`What is the key of the SECOND record?`,`33`,``],[`What is the key of the FOURTH record?`,`89`,``],[`What is the key of the FIRST record?`,`0`,``]],
+80:[[`What is the default key/value separator?`,`Tab character`,``],[`Which property changes the separator?`,`mapreduce.input.keyvaluelinerecordreader.key.value.separator`,``]],
+81:[[`With NLineInputFormat, each mapper receives a fixed number of lines.`,`True`,`لو بدّل Text/KeyValue بـ NLine تبقى True`],[`With TextInputFormat, each mapper receives a variable number of lines.`,`True`,``]],
+82:[[`With N = 1 (default) on the same 4-line file:`,`4 mappers`,``],[`With N = 4:`,`1 mapper`,``]],
+83:[[`NLineInputFormat produces different keys and values from TextInputFormat.`,`False — same; only splits differ`,``]],
+84:[[`Sequence files cannot be split.`,`False — splittable (sync points)`,``],[`Sequence files store sequences of:`,`Binary key-value pairs`,``]],
+85:[[`In the SequenceFile solution, the key and value are:`,`Key = file name, Value = file content`,``],[`A small file is significantly smaller than:`,`The HDFS block size (128 MB)`,``]],
+86:[[`How many objects for ONE small file (one block)?`,`2 (File + Block)`,``],[`10 million small files use about how much NameNode memory?`,`About 3 GB`,``]],
+87:[[`How many blocks does the 1 GB SequenceFile have?`,`8`,`1 GB ÷ 128 MB`],[`How much NameNode RAM do 9 objects use?`,`About 1.4 KB`,``]],
+88:[[`Where does the second split start in the figure?`,`At line 6`,``],[`Which split contains line 5, which spans blocks 1 and 2?`,`The first split`,``]],
+89:[[`An HDFS block is the physical storage unit, while an input split is a logical division for processing.`,`True`,`اعكسها تبقى True`],[`An input split always equals exactly one HDFS block.`,`False — usually, not always`,``]],
+90:[[`What is the map INPUT value type?`,`Text`,``],[`What is the map OUTPUT key type?`,`Text`,``],[`What is the map INPUT key type?`,`Object`,``]],
+91:[[`The output types of the reduce function must match the input types of the map function.`,`False`,`مش معادلة صح؛ القاعدة: map out = reduce in`]],
+92:[[`Which methods set the reduce function's output types?`,`setOutputKeyClass() / setOutputValueClass()`,``],[`If map and reduce outputs have the same types, setMapOutputKeyClass() is required.`,`False`,``]],
+93:[[`What is serialization?`,`Turning structured objects into a byte stream`,``],[`What is deserialization?`,`Turning a byte stream back into objects`,``]],
+94:[[`Two techniques for side data in MapReduce:`,`Job configuration and distributed cache`,``],[`Side data is writable by tasks.`,`False — read-only`,``]],
+95:[[`The job configuration is useful for passing:`,`A small piece of metadata`,``],[`Which class serializes objects for the job configuration?`,`DefaultStringifier (Stringifier)`,``]],
+96:[[`Files in the distributed cache are copied once per job to each node.`,`True`,``],[`The distributed cache size is configured in:`,`mapred-site.xml`,``]],
+97:[[`Before a task runs, the file's reference count is:`,`Incremented by 1`,``],[`After a task runs, the count is:`,`Decreased by 1`,``]],
+98:[[`A map-side join is less efficient than a reduce-side join.`,`False`,`معكوسة`],[`A reduce-side join is easier to implement and more general.`,`True`,``]],
+99:[[`In a map-side join, what is required?`,`Input partitioned and sorted by key`,``],[`In reduce join, the map output key is:`,`The join key`,``]],
+100:[[`In Grid computing, nodes communicate using:`,`MPI`,``],[`The RPC protocol uses ______ to render messages into binary streams.`,`serialization`,``]],
+101:[[`A key characteristic of TextInputFormat is:`,`It processes files line by line (offset, line)`,``],[`SequenceFileInputFormat file type is:`,`Binary`,``]],
+102:[[`Which component processes the map outputs for each key?`,`Reducer`,``],[`Which runs on map output to reduce shuffle?`,`Combiner`,``]],
+103:[[`One large file and one small lookup file to join: suitable approach?`,`Distributed cache (copy the small file to every node)`,``]],
+104:[[`Which system is good for datasets that are continually updated?`,`Traditional RDBMS`,``]],
+105:[[`Doubling data and cluster size keeps job time:`,`The same`,``]],
+106:[[`Which is more efficient at analyzing a whole petabyte dataset in batch?`,`Hadoop MapReduce`,``]],
+107:[[`Earlier Hadoop (1) could run only:`,`MapReduce`,``]],
+108:[[`Which best describes "schema on read"?`,`Data schema is applied during reading`,``]],
+109:[[`What is an ADVANTAGE of schema on read?`,`Flexibility / fast ingestion (just a file copy)`,``],[`What is a drawback of schema on write?`,`Less flexible; schema needed before storing`,``]],
+110:[[`How do traditional databases handle data integrity?`,`High integrity (ACID, strict schema on write)`,``]],
+111:[[`Which component runs and monitors containers on each node?`,`Node manager`,``],[`What is the unit of resources allocated to tasks?`,`Container`,``]],
+112:[[`What is a significant ADVANTAGE of MapReduce?`,`Fault tolerance / linear scalability`,``],[`In-memory processing is an advantage of:`,`Apache Spark`,``]],
+115:[[`Data locality means moving data to computation instead of computation to data.`,`False`,``]],
+116:[[`Which IS a typical use case for Apache Spark?`,`Machine learning / iterative processing / batch`,``],[`Which framework fits real-time processing?`,`Apache Flink`,``]],
+117:[[`What is the disadvantage of off-rack map tasks?`,`Higher network bandwidth usage (inter-rack transfer)`,``]],
+118:[[`What is the impact of running a map task data-local?`,`Reduced network congestion (no bandwidth used)`,``]],
+119:[[`When is a rack-local task used?`,`When all nodes holding the block replicas are busy`,``]],
+120:[[`What is the main advantage of data-local tasks over rack-local tasks?`,`Lower network latency / no network transfer`,``]],
+121:[[`Which IS a use case for Hadoop?`,`Massive amounts of data through parallelism`,``]],
+122:[[`What workloads is Hadoop NOT suited for?`,`Non-parallel work, low latency, small datasets`,``]],
+123:[[`For which IS Hadoop recommended?`,`Parallel processing of large datasets / structured & unstructured data / cheap hardware`,``]],
+124:[[`In ……, the join is performed in the mapper and the input must be partitioned and sorted.`,`map side join`,``]],
+125:[[`Each mapper should receive a variable number of lines (default behavior):`,`TextInputFormat`,``],[`Each line has a key before a tab:`,`KeyValueTextInputFormat`,``]],
+126:[[`What problem do one million small images cause?`,`NameNode memory overload and too many mappers (small file problem)`,``]],
+127:[[`A 2 GB lookup dataset must reach every node:`,`Distributed cache`,`الكبير → cache، الصغير → configuration`]],
+128:[[`5 city names (a few bytes) must reach every mapper:`,`Job configuration`,``]],
+129:[[`Which function runs on map output, just like the reduce function?`,`Combiner`,``]],
+130:[[`Where is the final (reduce) output stored?`,`HDFS`,``]],
+131:[[`Do map tasks have data locality?`,`Yes (data-local / rack-local / off-rack)`,``]],
+132:[[`How many 128 MB blocks for a 1 GB file?`,`8`,``]],
+133:[[`What happens if splits are TOO small?`,`Overhead of managing splits and creating map tasks dominates`,``]],
+134:[[`Which uses data locality?`,`Hadoop`,``],[`Which uses a shared file system hosted by a SAN?`,`Grid / HPC`,``]],
+135:[[`What does MPI give the programmer in exchange?`,`More control`,``]],
+136:[[`Because MapReduce is shared-nothing, the order of tasks:`,`Doesn't matter`,``]],
+137:[[`Which IS a feature of Hadoop?`,`Fault tolerance / data locality / horizontal scalability`,``],[`ACID transactions belong to:`,`RDBMS`,``]],
+138:[[`Replacing a server with a more powerful one is:`,`Vertical scaling (not Hadoop's approach)`,``]],
+139:[[`Which component stores the actual blocks?`,`DataNode`,``]],
+140:[[`Which data is the realm of the RDBMS?`,`Structured data`,``]],
+141:[[`What is a drawback of schema-on-read?`,`More work at read time / no data quality guarantees`,``]],
+142:[[`Why does normalized data cause problems for Hadoop?`,`Reading a record becomes nonlocal`,``]],
+143:[[`For which task is MapReduce better than an RDBMS?`,`Analyzing petabytes of logs in batch`,``]],
+144:[[`Which pattern uses Storm?`,`Stream processing`,``],[`Which pattern uses Hive on Tez?`,`Interactive SQL`,``]],
+145:[[`YARN stands for:`,`Yet Another Resource Negotiator`,``]],
+146:[[`Which Hadoop 2 component does job scheduling and resource management?`,`YARN`,``]],
+147:[[`Which of the 3Vs refers to streamed data collected in real time?`,`Velocity`,``]],
+148:[[`In TextInputFormat, the value is of type:`,`Text`,``]],
+149:[[`Which InputFormat gives each mapper a fixed number of lines?`,`NLineInputFormat`,``]],
+150:[[`Sequence files support compression as part of the format.`,`True`,``]],
+151:[[`About how many bytes were transferred over the network in the website traffic example?`,`~22 bytes`,``]],
+152:[[`What is the reducer's OUTPUT value type?`,`IntWritable`,``],[`What is the reducer's INPUT key type?`,`Text`,``]],
+153:[[`Which method sets the map output key type when it differs?`,`setMapOutputKeyClass()`,``],[`Which method sets the combiner?`,`setCombinerClass()`,``]],
+154:[[`Serialization is used in which two areas?`,`Interprocess communication (RPC) and persistent storage`,``]],
+155:[[`Which is suitable for a small piece of metadata (few KB)?`,`Job configuration`,``]],
+156:[[`What is the default size of the distributed cache?`,`10 GB`,``]],
+157:[[`What is required for a reduce-side join?`,`No particular structure; mapper tags records and uses the join key`,``]],
+158:[[`Why is a reduce-side join more general?`,`Input datasets don't have to be structured in any particular way`,``]],
+159:[[`Which method processes each input record?`,`map()`,``],[`Which method processes each key with its list of values?`,`reduce()`,``]],
+160:[[`Hadoop is a ______ platform that manages a cluster of computers.`,`middleware`,``]],
+161:[[`Which characteristic refers to the magnitude of data?`,`Volume`,``]],
+162:[[`Stream processing input data is:`,`Unbounded`,``]],
+163:[[`Which feature: data stored reliably due to replication?`,`Reliability`,``]],
+164:[[`A 256 MB file with 128 MB blocks occupies:`,`2 blocks`,``],[`A 100 MB file with 128 MB blocks occupies:`,`1 block`,``]],
+165:[[`Which is structured data according to the lecture?`,`XML documents / database tables with a predefined schema`,``]],
+166:[[`What is the most precious resource in a data center?`,`Network bandwidth`,``]],
+167:[[`The combiner replaces the reducer.`,`False`,``]],
+168:[[`Who manages the metadata of HDFS?`,`The NameNode`,``]],
+169:[[`With N = 2 on a 6-line file:`,`3 mappers`,``],[`With N = 3:`,`2 mappers`,``]],
+170:[[`How many objects does every small file cost the NameNode?`,`At least 2`,``]],
+171:[[`Which reads binary key-value pairs from sequence files?`,`SequenceFileInputFormat (its record reader)`,``]],
+172:[[`To store a Java object in the Configuration, use:`,`DefaultStringifier (or convert to String yourself)`,``]],
+173:[[`What does mapper2 output in the reduce join example?`,`[customer ID, "camount <amount>"]`,``],[`What does mapper1 output?`,`[customer ID, "cname <name>"]`,``]],
+174:[[`If both datasets are too large to copy to each node, can MapReduce still join them?`,`Yes — map-side or reduce-side join`,``]]
+};
 </script>
 <script>
 (function(){
@@ -1561,6 +1748,12 @@ Q.forEach((q,i)=>{
   if(!fixed){const r=rng(i*7919+31);for(let k=ord.length-1;k>0;k--){const j=Math.floor(r()*(k+1));[ord[k],ord[j]]=[ord[j],ord[k]];}}
   q.order=ord;
 });
+{const V=window.VARIANTS||{},byText={};Q.forEach(q=>{const k=q.q.trim().toLowerCase();if(byText[k]===undefined)byText[k]=q.id;q.v=V[q.id]||V[byText[k]]||[];});}
+function variantsHTML(q,compact){
+  if(!q.v||!q.v.length)return'';
+  const items=q.v.map(x=>`<li><span class="vq" dir="ltr">${fmt(x[0])}</span><span class="va" dir="ltr">→ ${fmt(x[1])}</span>${x[2]?`<span class="vn">${fmt(x[2])}</span>`:''}</li>`).join('');
+  return compact?`<ul class="vars">${items}</ul>`:`<div class="sec varbox"><h4>لو السؤال اتغيّر: الإجابة تبقى إيه؟</h4><ul class="vars">${items}</ul></div>`;
+}
 const setOf=n=>SETS.find(s=>s.n===n);
 const isQuiz=n=>!!(setOf(n)&&setOf(n).quiz);
 const setName=n=>isQuiz(n)?`Quiz ${n-7}`:`Set ${n}`;
@@ -1603,6 +1796,7 @@ function revealHTML(q,ctx){
     <div class="sec"><h4>الإجابة</h4><p class="answer"><span class="en">${fmt(ansTxt)}</span></p></div>
     <div class="sec"><h4>ليه كل اختيار صح أو غلط</h4><ul class="whys">${whys}</ul></div>
     <div class="tip sec"><h4>هنت الامتحان</h4><p>${fmt(q.tip)}</p></div>
+    ${variantsHTML(q)}
     ${(S.flags[q.id]||ctx==='review')?deepHTML(q):''}
     <div class="src">${esc(q.src)}</div></div>`;
 }
@@ -1694,10 +1888,10 @@ function renderSummary(){
   const uniq=Q.filter(q=>{const k=q.q.trim().toLowerCase();if(seen.has(k))return false;seen.add(k);return true;});
   h+=`<h2 class="sum" id="s-qh">5. هنتات كل الأسئلة: اخترنا الإجابة دي ليه</h2><section class="topic"><p class="lesson">كل سؤال في البنك والكويزات (من غير تكرار)، مترتبين بالمحاضرة والموضوع: الإجابة، ليه اخترناها، والهنت اللي تفتكره بيه. دوس على أي موضوع يفتح.</p>`;
   LEC.forEach(l=>{l.topics.forEach(k=>{const qs=uniq.filter(q=>q.tp===k);if(!qs.length)return;
-    h+=`<details class="qh"><summary>Lecture ${l.n} · ${esc(T[k].title)} (${qs.length})</summary><div class="tbl"><table><thead><tr><th class="en">Question</th><th class="en">Answer</th><th>اخترناها ليه</th><th>الهنت</th></tr></thead><tbody>${qs.map(q=>{
+    h+=`<details class="qh"><summary>Lecture ${l.n} · ${esc(T[k].title)} (${qs.length})</summary><div class="tbl"><table><thead><tr><th class="en">Question</th><th class="en">Answer</th><th>اخترناها ليه</th><th>الهنت</th><th>لو السؤال اتغيّر</th></tr></thead><tbody>${qs.map(q=>{
       let why=String(q.w[q.a]).replace(/^صح( حسب السلايد)?\s*[—-]?\s*/,'').replace(/^\.\s*/,'').trim();
       if(why.length<25){const ex=String(q.ex).replace(/\n/g,' ');const cut=ex.search(/\.\s/);why=(why?why+' ':'')+(cut>0&&cut<260?ex.slice(0,cut+1):ex.slice(0,240)+'…');}
-      return `<tr><td class="en">${fmt(q.q.length>140?q.q.slice(0,137)+'…':q.q)}</td><td class="ans">${fmt(q.o[q.a])}</td><td class="why">${fmt(why)}</td><td class="hint">${fmt(q.tip)}</td></tr>`;}).join('')}</tbody></table></div></details>`;});});
+      return `<tr><td class="en">${fmt(q.q.length>140?q.q.slice(0,137)+'…':q.q)}</td><td class="ans">${fmt(q.o[q.a])}</td><td class="why">${fmt(why)}</td><td class="hint">${fmt(q.tip)}</td><td class="vcol">${variantsHTML(q,true)}</td></tr>`;}).join('')}</tbody></table></div></details>`;});});
   h+=`</section>`;
   // 6 glossary
   h+=`<h2 class="sum" id="s-gloss">6. أهم المصطلحات</h2><section class="topic"><div class="tbl"><table><tbody>${G.map(g=>`<tr><td class="en"><b>${esc(g[0])}</b></td><td class="en">${esc(g[1])}</td></tr>`).join('')}</tbody></table></div></section>`;
